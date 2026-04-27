@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(py -3 train.py)",
+      "Bash(py -3 -c \"import train; print\\('features:', train.features\\)\")",
+      "Bash(py -3 -c \"import train; print\\('model:', train.model_config['type']\\); print\\('features:', train.features\\)\")"
+    ]
+  }
+}
