@@ -15,3 +15,18 @@ Observations:
 - The CV Mean of 0.648 is higher than the Val log loss meaning 2024 is more predictable than the average season
 
 Goal for next week: Establish an auto research agent loop
+
+Week 3:
+
+Goal: Experience the Loop and Launch Your First Project-Specific Agent Loop
+
+What I Tried:
+- Created program.md instructions for the agent for each loop I wanted it to run
+- Installed Claude Code on my computer and had it run the loop autonomously
+- Had the agent update program.md, failure_log.md and evaluation_board.md after each run
+
+Observations:
+- Adding rolling win percentage buckets did improve the model but not enough to meet the threshold
+- Using baseline XGBoost negatively impacted the model over logistic regression, and optimizing hyperparameters only marginally improved log loss
+
+Goal for next week: Improve the auto research loop and aim to learn from the agent's results to get a better model.
