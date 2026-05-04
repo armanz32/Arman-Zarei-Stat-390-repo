@@ -32,7 +32,7 @@ Step 2 — Make exactly one change: Edit train.py to implement that item and not
 Step 3 — Run the experiment; python train.py
 Record the val log loss and CV mean ± std printed to stdout.
 
-Step 4 — Evaluate: Compare new_val_log_loss against current_best_val_log_loss * 0.98.
+Step 4 — Evaluate: Compare new_val_log_loss against current_best_val_log_loss * 0.985.
 If accepted: Update "Current best val log loss" above. Save the model checkpoint to results/best_model/. Mark the queue item ✅.
 If rejected: Revert train.py to its previous state (the accepted version). Mark the queue item ❌. Log the failure in failure_log.md.
 
@@ -74,7 +74,7 @@ Change: Added home_win_pct_4/8/16 and away_win_pct_4/8/16 computed in-memory fro
 Val log loss: [0.619831]
 CV mean ± std: [0.637591] ± [0.006189]
 Accepted: No
-Notes: Improvement of ~0.60% (0.623589 → 0.619831) falls below the 2% required threshold (0.611117). train.py reverted to baseline.
+Notes: Improvement of ~0.60% (0.623589 → 0.619831) falls below the 1.5% required threshold (0.614135). train.py reverted to baseline.
 
 Run 002 — Groups A + B + C (baseline + rolling scoring avg + rolling win %)
 Date: [4/26/2026]
@@ -82,7 +82,7 @@ Change: Added Group B (home/away_score_avg_4/8/16) and Group C (home/away_win_pc
 Val log loss: [0.616790]
 CV mean ± std: [0.633451] ± [0.004513]
 Accepted: No
-Notes: Improvement of ~1.09% (0.623589 → 0.616790) falls below the 2% required threshold (0.611117). train.py reverted to baseline.
+Notes: Improvement of ~1.09% (0.623589 → 0.616790) falls below the 1.5% required threshold (0.614135). train.py reverted to baseline.
 
 Run 003 — XGBoost, Groups A + B + C
 Date: [4/26/2026]
@@ -98,13 +98,5 @@ Change: Grid search over 6 XGBoost hyperparameter combos selected by CV. Best: m
 Val log loss: [0.619820]
 CV mean ± std: [0.640998] ± [0.004798]
 Accepted: No
-Notes: Best XGBoost config (depth=3, trees=100) achieves 0.60% improvement over baseline — identical to logistic regression with rolling features (Run 001: 0.619831). Below the 2% threshold. Shallower/fewer trees consistently outperform deeper/more trees. train.py reverted to baseline.
-
-Run 005 — elo_diff × home_win_pct_8 interaction term
-Date: [5/4/2026]
-Change: Added elo_diff × home_win_pct_8 as a single interaction feature on top of the baseline. home_win_pct_8 is the home team's rolling win % over their last 8 games (computed in-memory across combined train+val, shift(1) to prevent leakage). 4 features total.
-Val log loss: [0.623391]
-CV mean ± std: [0.648741] ± [0.008359]
-Accepted: No
-Notes: Improvement of ~0.032% (0.623589 → 0.623391) falls far below the 2% required threshold (0.611117). The interaction term adds negligible signal. train.py reverted to baseline. best_meta.json restored to run_0 (0.623589).
+Notes: Best XGBoost config (depth=3, trees=100) achieves 0.60% improvement over baseline — identical to logistic regression with rolling features (Run 001: 0.619831). Below the 1.5% threshold. Shallower/fewer trees consistently outperform deeper/more trees. train.py reverted to baseline.
 

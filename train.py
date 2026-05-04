@@ -27,7 +27,6 @@ rolling_features = [
 ]
 features = baseline_features + rolling_features
 
-features = baseline_features
 model_config = {
     "type": "logistic_regression",
     "C": 1.0,

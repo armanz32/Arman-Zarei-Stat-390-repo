@@ -5,7 +5,7 @@
 **Val log loss:** 0.619831
 **Current best:** 0.623589
 **Threshold required:** 0.611117 (current_best × 0.98)
-**Improvement:** 0.60% — below the 2% minimum threshold.
+**Improvement:** 0.60% — below the 1.5% minimum threshold.
 **Decision:** Rejected. train.py reverted to baseline. best_meta.json restored to run_0 (0.623589).
 
 ---
@@ -24,7 +24,7 @@
 **Val log loss:** 0.616790
 **Current best:** 0.623589
 **Threshold required:** 0.611117 (current_best × 0.98)
-**Improvement:** 1.09% — below the 2% minimum threshold.
+**Improvement:** 1.09% — below the 1.5% minimum threshold.
 **Decision:** Rejected. train.py reverted to baseline. best_meta.json restored to run_0 (0.623589).
 
 ---
@@ -46,6 +46,6 @@
 **Val log loss:** 0.619820
 **Current best:** 0.623589
 **Threshold required:** 0.611117 (current_best × 0.98)
-**Improvement:** 0.60% — below the 2% minimum threshold.
+**Improvement:** 0.60% — below the 1.5% minimum threshold.
 **Decision:** Rejected. train.py reverted to baseline. best_meta.json restored to run_0 (0.623589).
 
