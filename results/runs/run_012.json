@@ -1,0 +1,26 @@
+{
+  "run_id": 12,
+  "val_loss": 0.624245,
+  "cv_mean": 0.640833,
+  "cv_std": 0.007921,
+  "features": [
+    "elo_diff",
+    "home_game",
+    "rest_diff",
+    "home_score_avg_4",
+    "home_score_avg_8",
+    "home_score_avg_16",
+    "away_score_avg_4",
+    "away_score_avg_8",
+    "away_score_avg_16",
+    "home_win_pct_4",
+    "home_win_pct_8",
+    "home_win_pct_16"
+  ],
+  "config": {
+    "type": "logistic_regression",
+    "C": 1.0,
+    "max_iter": 1000
+  },
+  "runtime_s": 0.21
+}

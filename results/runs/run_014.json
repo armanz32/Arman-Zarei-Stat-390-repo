@@ -1,0 +1,16 @@
+{
+  "run_id": 14,
+  "val_loss": 0.622446,
+  "cv_mean": 0.648547,
+  "cv_std": 0.006189,
+  "features": [
+    "elo_diff",
+    "home_game"
+  ],
+  "config": {
+    "type": "logistic_regression",
+    "C": 1.0,
+    "max_iter": 1000
+  },
+  "runtime_s": 0.12
+}

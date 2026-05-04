@@ -49,3 +49,62 @@
 **Improvement:** 0.60% — below the 1.5% minimum threshold.
 **Decision:** Rejected. train.py reverted to baseline. best_meta.json restored to run_0 (0.623589).
 
+---
+
+### Run 005 — 2026-05-04
+**Change:** Add elo_diff × home_win_pct_8 interaction term (13 features: baseline + rolling scoring avg + home win pct 4/8/16 + interaction).
+**Val log loss:** 0.623928
+**Current best:** 0.623589
+**Threshold required:** 0.614135 (current_best × 0.985)
+**Result:** Regression — 0.623928 > 0.623589. Interaction term made performance slightly worse.
+**Decision:** Rejected. train.py reverted to pre-Run-005 state. best_meta.json unchanged.
+
+---
+
+### Run 006 — 2026-05-04
+**Change:** Add elo_diff² (elo_diff_sq = elo_diff ** 2) as a 13th feature. Model: logistic regression, 12 base features + squared ELO.
+**Val log loss:** 0.622981
+**Current best:** 0.623589
+**Threshold required:** 0.614135 (current_best × 0.985)
+**Improvement:** 0.10% — below the 1.5% minimum threshold.
+**Decision:** Rejected. train.py reverted to pre-Run-006 state. best_meta.json restored to run_0 (0.623589).
+
+---
+
+### Run 007 — 2026-05-04
+**Change:** Add rest_diff × away_score_avg_8 interaction term (13 features: baseline + rolling scoring avg + home win pct 4/8/16 + interaction).
+**Val log loss:** 0.624205
+**Current best:** 0.623589
+**Threshold required:** 0.614135 (current_best × 0.985)
+**Result:** Regression — 0.624205 > 0.623589. Interaction term made performance worse.
+**Decision:** Rejected. train.py reverted to pre-Run-007 state. best_meta.json unchanged (save_best correctly skipped).
+
+---
+
+### Run 008 — 2026-05-04
+**Change:** Bin elo_diff into 5 ordinal categories (quantile bins on train, fixed edges applied to val).
+**Val log loss:** 0.625514
+**Current best:** 0.623589
+**Threshold required:** 0.614135 (current_best × 0.985)
+**Result:** Regression — 0.625514 > 0.623589. Discretizing ELO diff loses information; ordinal bin alongside raw elo_diff adds noise.
+**Decision:** Rejected. train.py reverted to pre-Run-008 state. best_meta.json unchanged (save_best correctly skipped).
+
+---
+
+### Run 009 — 2026-05-04
+**Change:** Add elo_diff² (elo_diff_sq = elo_diff ** 2) as a 4th feature on top of the true 3-feature baseline.
+**Val log loss:** 0.622191
+**Current best:** 0.623589
+**Threshold required:** 0.614135 (current_best × 0.985)
+**Improvement:** 0.22% — below the 1.5% minimum threshold.
+**Decision:** Rejected. train.py reverted to true 3-feature baseline. best_meta.json restored to run_0 (0.623589).
+
+---
+
+### Run 010 — 2026-05-04
+**Change:** Drop rest_diff entirely — features reduced to elo_diff + home_game (2 features).
+**Val log loss:** 0.622446
+**Current best:** 0.623589
+**Threshold required:** 0.614135 (current_best × 0.985)
+**Improvement:** 0.18% — below the 1.5% minimum threshold.
+**Decision:** Rejected. train.py reverted to 3-feature baseline. best_meta.json restored to run_0 (0.623589).

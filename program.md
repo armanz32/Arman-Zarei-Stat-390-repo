@@ -52,13 +52,17 @@ Experiemnt Queue
 ❌ 002: Add Groups A + B + C together 
 ❌ 003: Switch model to XGBoost, keep Groups A + B + C
 ❌ 004: Tune XGBoost: grid search over max_depth ∈ {3,5,7}, n_estimators ∈ {100,300}
-005: Add elo_diff × home_win_pct_8 interaction term
-006: Add elo_diff² (squared ELO diff)
-007: rest_diff × away_score_avg_8 interaction
-008: Bin elo_diff into 5 ordinal categories
+❌ 005: Add elo_diff × home_win_pct_8 interaction term
+❌ 006: Add elo_diff² (squared ELO diff)
+❌ 007: rest_diff × away_score_avg_8 interaction
+❌ 008: Bin elo_diff into 5 ordinal categories
+❌ 009: Add elo_diff² (squared ELO diff)
+❌ 010: Drop rest_diff entirely
 
 Iteration Log
 Append one entry per run. Do not edit previous entries.
+
+Prepend entries to failure_log.md — new entries must always be appended to the BOTTOM of the file
 
 Run 000 — Baseline
 Date: [4/19/2026]
@@ -99,4 +103,52 @@ Val log loss: [0.619820]
 CV mean ± std: [0.640998] ± [0.004798]
 Accepted: No
 Notes: Best XGBoost config (depth=3, trees=100) achieves 0.60% improvement over baseline — identical to logistic regression with rolling features (Run 001: 0.619831). Below the 1.5% threshold. Shallower/fewer trees consistently outperform deeper/more trees. train.py reverted to baseline.
+
+Run 005 — elo_diff × home_win_pct_8 interaction term
+Date: [5/4/2026]
+Change: Added elo_diff_x_home_win_pct_8 = elo_diff * home_win_pct_8 as a 13th feature. Model: logistic regression. Base feature set: Groups A+B (baseline + rolling scoring avg + home win pct 4/8/16).
+Val log loss: [0.623928]
+CV mean ± std: [0.640814] ± [0.007667]
+Accepted: No
+Notes: Regression — interaction term made performance worse (0.623928 > 0.623589 baseline). elo_diff × home_win_pct_8 provides no additive signal over the existing individual features; may introduce collinearity. train.py reverted to pre-Run-005 state.
+
+Run 006 — elo_diff² (squared ELO diff)
+Date: [5/4/2026]
+Change: Added elo_diff_sq = elo_diff ** 2 as a 13th feature. Model: logistic regression. Base feature set: baseline + rolling scoring avg + home win pct 4/8/16.
+Val log loss: [0.622981]
+CV mean ± std: [0.640554] ± [0.007697]
+Accepted: No
+Notes: Tiny improvement of ~0.10% (0.623589 → 0.622981) — below the 1.5% threshold (0.614135). The quadratic ELO term adds marginal signal but not enough to cross the bar. train.py reverted. best_meta.json restored to run_0 (0.623589).
+
+Run 007 — rest_diff × away_score_avg_8 interaction
+Date: [5/4/2026]
+Change: Added rest_diff_x_away_score_avg_8 = rest_diff * away_score_avg_8 as a 13th feature. Model: logistic regression. Base feature set: baseline + rolling scoring avg + home win pct 4/8/16.
+Val log loss: [0.624205]
+CV mean ± std: [0.641083] ± [0.008146]
+Accepted: No
+Notes: Regression — 0.624205 > 0.623589 (baseline). The rest/scoring interaction hurts performance. train.py reverted to pre-Run-007 state. best_meta.json unchanged (save_best correctly skipped).
+
+Run 008 — Bin elo_diff into 5 ordinal categories
+Date: [5/4/2026]
+Change: Added elo_diff_bin as a 13th feature — 5 quantile bins computed on training data, applied to val with fixed edges (-inf/+inf clipped). Model: logistic regression. Base feature set: baseline + rolling scoring avg + home win pct 4/8/16.
+Val log loss: [0.625514]
+CV mean ± std: [0.640376] ± [0.007937]
+Accepted: No
+Notes: Regression — 0.625514 > 0.623589 (baseline). Discretizing ELO diff loses continuous signal; the ordinal bin alongside the raw elo_diff feature introduces redundancy that hurts more than it helps. train.py reverted to pre-Run-008 state. best_meta.json unchanged (save_best correctly skipped).
+
+Run 009 — elo_diff² (squared ELO diff), true baseline
+Date: [5/4/2026]
+Change: Added elo_diff_sq = elo_diff ** 2 as a 4th feature on top of the true 3-feature baseline (elo_diff, home_game, rest_diff).
+Val log loss: [0.622191]
+CV mean ± std: [0.647926] ± [0.005452]
+Accepted: No
+Notes: Improvement of ~0.22% (0.623589 → 0.622191) — below the 1.5% threshold (0.614135). Better than Run 006 (0.622981), which tested the same feature on top of 12 features. Squared ELO adds marginal signal but not enough to clear the bar. train.py reverted to true baseline. best_meta.json restored to run_0 (0.623589).
+
+Run 010 — Drop rest_diff entirely
+Date: [5/4/2026]
+Change: Removed rest_diff from features, leaving only elo_diff and home_game (2 features).
+Val log loss: [0.622446]
+CV mean ± std: [0.648547] ± [0.006189]
+Accepted: No
+Notes: Improvement of ~0.18% (0.623589 → 0.622446) — below the 1.5% threshold (0.614135). Dropping rest_diff marginally helps, suggesting it adds slight noise, but the gain is well below the bar. train.py reverted to 3-feature baseline. best_meta.json restored to run_0 (0.623589).
 

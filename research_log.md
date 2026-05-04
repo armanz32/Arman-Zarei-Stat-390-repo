@@ -33,4 +33,14 @@ Goal for next week: Improve the auto research loop and aim to learn from the age
 
 Week 4
 
-Goal: 
+Goal: Controlled Experiments and Error Taxonomy
+
+What I Tried:
+- A controlled experiment set of feature engineering
+- Edited the prepare file to include a new feature but removed it after
+
+Observations:
+- Adding interaction and polynomial features either made marginal improvements that didn't pass the threshold or negatively impacted log loss
+- Rolling features as a baseline feature didn't work, but removing rest_days as a baseline feature slightly improved log loss
+
+Goal for Next Week: Get a success and improve the general process

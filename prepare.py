@@ -116,7 +116,7 @@ if __name__ == "__main__":
     df = compute_elo(df)
     print("Adding features...")
     df = add_misc_features(df)
-    df = add_rolling_features(df)
+    #df = add_rolling_features(df)
     print("Saving splits...")
     split_and_save(df)
     print("Done.")

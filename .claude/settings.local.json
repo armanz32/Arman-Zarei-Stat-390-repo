@@ -5,7 +5,10 @@
       "Bash(py -3 -c \"import train; print\\('features:', train.features\\)\")",
       "Bash(py -3 -c \"import train; print\\('model:', train.model_config['type']\\); print\\('features:', train.features\\)\")",
       "Bash(python -c \"import pandas as pd; df = pd.read_csv\\('data/processed/train.csv'\\); print\\(df.columns.tolist\\(\\)\\); print\\(df.shape\\); print\\(df.head\\(3\\).to_string\\(\\)\\)\")",
-      "Bash(python train.py)"
+      "Bash(python train.py)",
+      "Bash(python -c \"import pandas as pd; df = pd.read_csv\\('data/processed/train.csv'\\); print\\(list\\(df.columns\\)\\)\")",
+      "Bash(python prepare.py)",
+      "Bash(python -c \"import pandas as pd; df = pd.read_csv\\('data/processed/train.csv'\\); print\\([c for c in df.columns if 'win_pct' in c or 'score_avg' in c]\\)\")"
     ]
   }
 }

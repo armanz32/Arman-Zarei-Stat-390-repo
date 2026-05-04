@@ -25,7 +25,7 @@ rolling_features = [
     "away_score_avg_4", "away_score_avg_8", "away_score_avg_16",
     "home_win_pct_4", "home_win_pct_8", "home_win_pct_16",
 ]
-features = baseline_features + rolling_features
+features = baseline_features
 
 model_config = {
     "type": "logistic_regression",
