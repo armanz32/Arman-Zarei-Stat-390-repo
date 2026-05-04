@@ -100,3 +100,11 @@ CV mean ± std: [0.640998] ± [0.004798]
 Accepted: No
 Notes: Best XGBoost config (depth=3, trees=100) achieves 0.60% improvement over baseline — identical to logistic regression with rolling features (Run 001: 0.619831). Below the 2% threshold. Shallower/fewer trees consistently outperform deeper/more trees. train.py reverted to baseline.
 
+Run 005 — elo_diff × home_win_pct_8 interaction term
+Date: [5/4/2026]
+Change: Added elo_diff × home_win_pct_8 as a single interaction feature on top of the baseline. home_win_pct_8 is the home team's rolling win % over their last 8 games (computed in-memory across combined train+val, shift(1) to prevent leakage). 4 features total.
+Val log loss: [0.623391]
+CV mean ± std: [0.648741] ± [0.008359]
+Accepted: No
+Notes: Improvement of ~0.032% (0.623589 → 0.623391) falls far below the 2% required threshold (0.611117). The interaction term adds negligible signal. train.py reverted to baseline. best_meta.json restored to run_0 (0.623589).
+

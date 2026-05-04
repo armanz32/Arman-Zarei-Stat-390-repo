@@ -48,3 +48,4 @@
 **Threshold required:** 0.611117 (current_best × 0.98)
 **Improvement:** 0.60% — below the 2% minimum threshold.
 **Decision:** Rejected. train.py reverted to baseline. best_meta.json restored to run_0 (0.623589).
+

@@ -20,7 +20,6 @@ results_dir.mkdir(parents=True, exist_ok=True)
 best_dir.mkdir(parents=True, exist_ok=True)
 
 baseline_features = ["elo_diff", "home_game", "rest_diff"]
-
 rolling_features = [
     "home_score_avg_4", "home_score_avg_8", "home_score_avg_16",
     "away_score_avg_4", "away_score_avg_8", "away_score_avg_16",
@@ -28,6 +27,7 @@ rolling_features = [
 ]
 features = baseline_features + rolling_features
 
+features = baseline_features
 model_config = {
     "type": "logistic_regression",
     "C": 1.0,
