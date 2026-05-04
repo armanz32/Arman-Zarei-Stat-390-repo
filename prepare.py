@@ -46,6 +46,37 @@ def compute_elo(df):
     df["elo_diff"] = df["home_elo"] - df["away_elo"]
     return df
 
+#rolling features
+def add_rolling_features(df):
+    df = df.copy()
+    for window in windows:
+        for team_type in ["home", "away"]:
+            score_col = f"{team_type}_score"
+            win_col = "home_win" if team_type == "home" else None
+            score_avgs = []
+            win_pcts = []
+            team_col = f"{team_type}_team"
+            team_scores = {}
+            team_wins = {}
+            for _, row in df.iterrows():
+                team = row[team_col]
+                scores = team_scores.get(team, [])
+                score_avgs.append(sum(scores[-window:]) / len(scores[-window:]) if scores else None)
+                scores.append(row[score_col])
+                team_scores[team] = scores
+                if team_type == "home":
+                    wins = team_wins.get(team, [])
+                    win_pcts.append(sum(wins[-window:]) / len(wins[-window:]) if wins else None)
+                    wins.append(row["home_win"])
+                    team_wins[team] = wins
+            
+            df[f"{team_type}_score_avg_{window}"] = score_avgs
+            if team_type == "home":
+                df[f"home_win_pct_{window}"] = win_pcts
+
+    df = df.fillna(df.median(numeric_only=True))
+    return df
+
 #misc features
 def add_misc_features(df):
     df = df.copy()
