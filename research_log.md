@@ -30,3 +30,7 @@ Observations:
 - Using baseline XGBoost negatively impacted the model over logistic regression, and optimizing hyperparameters only marginally improved log loss
 
 Goal for next week: Improve the auto research loop and aim to learn from the agent's results to get a better model.
+
+Week 4
+
+Goal: 

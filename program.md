@@ -22,9 +22,8 @@ If you are unsure whether an action is allowed, do not take it. Log the ambiguit
 
 Metric & Acceptance Rule
 Metric: Log loss on the 2024 validation season (produced by train.py)
-Acceptance threshold: A change is accepted only if: new_val_log_loss < current_best_val_log_loss * 0.98
-This means a minimum 2% improvement is required. Improvements smaller than 2% are discarded even if positive.
-Current best val log loss: [UPDATE THIS AFTER EACH ACCEPTED RUN]
+Acceptance threshold: A change is accepted only if: new_val_log_loss < current_best_val_log_loss * 0.985
+This means a minimum 1.5% improvement is required. Improvements smaller than 1.5% are discarded even if positive.
 
 The Loop (execute exactly in this order)
 Step 1 — Read the queue: Read the next unchecked item in the Experiment Queue below. Do not skip items or reorder them.
@@ -53,6 +52,10 @@ Experiemnt Queue
 ❌ 002: Add Groups A + B + C together 
 ❌ 003: Switch model to XGBoost, keep Groups A + B + C
 ❌ 004: Tune XGBoost: grid search over max_depth ∈ {3,5,7}, n_estimators ∈ {100,300}
+005: Add elo_diff × home_win_pct_8 interaction term
+006: Add elo_diff² (squared ELO diff)
+007: rest_diff × away_score_avg_8 interaction
+008: Bin elo_diff into 5 ordinal categories
 
 Iteration Log
 Append one entry per run. Do not edit previous entries.
