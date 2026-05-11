@@ -108,3 +108,463 @@
 **Threshold required:** 0.614135 (current_best × 0.985)
 **Improvement:** 0.18% — below the 1.5% minimum threshold.
 **Decision:** Rejected. train.py reverted to 3-feature baseline. best_meta.json restored to run_0 (0.623589).
+
+---
+
+### Run 013 — 2026-05-11
+**Change:** Set max_depth=4 in XGBoost model_config. 23-feature set unchanged.
+**Val log loss:** 0.676621
+**Current best (Week 5 block):** 0.647696 (Run 012)
+**Threshold required:** 0.646077 (current_best × 0.9975)
+**Result:** Regression — 0.676621 > 0.647696 (+4.47%). Deeper trees overfit more on the 23-feature set; CV std rises from 0.010 to 0.015.
+**Decision:** Rejected. train.py reverted to Run 012 state (max_depth=2).
+
+---
+
+### Run 014 — 2026-05-11
+**Change:** Set max_depth=6 in XGBoost model_config. 23-feature set unchanged.
+**Val log loss:** 0.702775
+**Current best (Week 5 block):** 0.647696 (Run 012)
+**Threshold required:** 0.646077 (current_best × 0.9975)
+**Result:** Identical to Run 011b (0.702775) — max_depth=6 is the XGBoost default, confirming 011b used depth 6. Regression vs Run 012 (+8.49%).
+**Decision:** Rejected. train.py reverted to Run 012 state (max_depth=2).
+
+---
+
+### Run 015 — 2026-05-11
+**Change:** Set n_estimators=100 explicitly. max_depth=2, 23-feature set unchanged.
+**Val log loss:** 0.647696
+**Current best (Week 5 block):** 0.647696 (Run 012)
+**Threshold required:** 0.646077 (current_best × 0.9975)
+**Result:** Identical to Run 012 — n_estimators=100 is the XGBoost default. No change in performance.
+**Decision:** Rejected. train.py reverted to Run 012 state (max_depth=2, no explicit n_estimators).
+
+---
+
+### Run 016 — 2026-05-11
+**Change:** Set n_estimators=300. max_depth=2, 23-feature set unchanged.
+**Val log loss:** 0.663226
+**Current best (Week 5 block):** 0.647696 (Run 012)
+**Threshold required:** 0.646077 (current_best × 0.9975)
+**Result:** Regression — 0.663226 > 0.647696 (+2.39%). More trees with depth=2 overfit further.
+**Decision:** Rejected. train.py reverted to Run 012 state (max_depth=2).
+
+---
+
+### Run 017 — 2026-05-11
+**Change:** Set n_estimators=500. max_depth=2, 23-feature set unchanged.
+**Val log loss:** 0.687740
+**Current best (Week 5 block):** 0.647696 (Run 012)
+**Threshold required:** 0.646077 (current_best × 0.9975)
+**Result:** Regression — 0.687740 > 0.647696 (+6.19%). n_estimators monotonically worsens: 100 (0.647696) < 300 (0.663226) < 500 (0.687740).
+**Decision:** Rejected. train.py reverted to Run 012 state (max_depth=2).
+
+---
+
+### Run 020 — 2026-05-11
+**Change:** Set learning_rate=0.3. max_depth=2, 23-feature set unchanged.
+**Val log loss:** 0.647696
+**Current best (Week 5 block):** 0.622824 (Run 019)
+**Threshold required:** 0.621268 (current_best × 0.9975)
+**Result:** lr=0.3 is XGBoost default — identical result to Run 012 (0.647696). Regression vs Run 019 (+3.99%).
+**Decision:** Rejected. train.py reverted to Run 019 state (max_depth=2, learning_rate=0.05).
+
+---
+
+### Run 021 — 2026-05-11
+**Change:** Set subsample=0.6. max_depth=2, lr=0.05, 23-feature set unchanged.
+**Val log loss:** 0.623504
+**Current best (Week 5 block):** 0.622824 (Run 019)
+**Threshold required:** 0.621268 (current_best × 0.9975)
+**Result:** Marginal regression — 0.623504 > 0.622824 (+0.11%). Does not clear the 0.25% improvement bar.
+**Decision:** Rejected. train.py reverted to Run 019 state (max_depth=2, lr=0.05).
+
+---
+
+### Run 022 — 2026-05-11
+**Change:** Set subsample=0.8. max_depth=2, lr=0.05, 23-feature set unchanged.
+**Val log loss:** 0.623846
+**Current best (Week 5 block):** 0.622824 (Run 019)
+**Threshold required:** 0.621268 (current_best × 0.9975)
+**Result:** Regression — 0.623846 > 0.622824 (+0.16%). subsample=0.8 worse than 0.6; both hurt performance vs Run 019.
+**Decision:** Rejected. train.py reverted to Run 019 state (max_depth=2, lr=0.05).
+
+---
+
+### Run 023 — 2026-05-11
+**Change:** Set colsample_bytree=0.6. max_depth=2, lr=0.05, 23-feature set unchanged.
+**Val log loss:** 0.621875
+**Current best (Week 5 block):** 0.622824 (Run 019)
+**Threshold required:** 0.621268 (current_best × 0.9975)
+**Result:** Improvement of 0.15% (0.622824 → 0.621875) — below the 0.25% minimum threshold.
+**Decision:** Rejected. train.py reverted to Run 019 state. best_meta.json restored to run_24 (0.622824).
+
+---
+
+### Run 024 — 2026-05-11
+**Change:** Set colsample_bytree=0.8. max_depth=2, lr=0.05, 23-feature set unchanged.
+**Val log loss:** 0.624324
+**Current best (Week 5 block):** 0.622824 (Run 019)
+**Threshold required:** 0.621268 (current_best × 0.9975)
+**Result:** Regression — 0.624324 > 0.622824 (+0.24%). colsample_bytree=0.8 is worse than 0.6; both hurt vs no column subsampling.
+**Decision:** Rejected. train.py reverted to Run 019 state (max_depth=2, lr=0.05).
+
+---
+
+### Run 025 — 2026-05-11
+**Change:** Set min_child_weight=2. max_depth=2, lr=0.05, 23-feature set unchanged.
+**Val log loss:** 0.622572
+**Current best (Week 5 block):** 0.622824 (Run 019)
+**Threshold required:** 0.621268 (current_best × 0.9975)
+**Result:** Improvement of 0.04% (0.622824 → 0.622572) — below the 0.25% minimum threshold.
+**Decision:** Rejected. train.py reverted to Run 019 state. best_meta.json restored to run_24 (0.622824).
+
+---
+
+### Run 026 — 2026-05-11
+**Change:** Set min_child_weight=5. max_depth=2, lr=0.05, 23-feature set unchanged.
+**Val log loss:** 0.622013
+**Current best (Week 5 block):** 0.622824 (Run 019)
+**Threshold required:** 0.621268 (current_best × 0.9975)
+**Result:** Improvement of 0.13% (0.622824 → 0.622013) — below the 0.25% minimum threshold.
+**Decision:** Rejected. train.py reverted to Run 019 state. best_meta.json restored to run_24 (0.622824).
+
+---
+
+### Run 027 — 2026-05-11
+**Change:** Set reg_lambda=1. max_depth=2, lr=0.05, 23-feature set unchanged.
+**Val log loss:** 0.622824
+**Current best (Week 5 block):** 0.622824 (Run 019)
+**Threshold required:** 0.621268 (current_best × 0.9975)
+**Result:** Identical to Run 019 — reg_lambda=1 is the XGBoost default. No improvement.
+**Decision:** Rejected. train.py reverted to Run 019 state (max_depth=2, lr=0.05).
+
+---
+
+### Run 028 — 2026-05-11
+**Change:** Set reg_lambda=5. max_depth=2, lr=0.05, 23-feature set unchanged.
+**Val log loss:** 0.622305
+**Current best (Week 5 block):** 0.622824 (Run 019)
+**Threshold required:** 0.621268 (current_best × 0.9975)
+**Result:** Improvement of 0.08% (0.622824 → 0.622305) — below the 0.25% minimum threshold.
+**Decision:** Rejected. train.py reverted to Run 019 state. best_meta.json restored to run_24 (0.622824).
+
+---
+
+### Run 029 — 2026-05-11
+**Change:** Set reg_alpha=0.1. max_depth=2, lr=0.05, 23-feature set unchanged.
+**Val log loss:** 0.623085
+**Current best (Week 5 block):** 0.622824 (Run 019)
+**Threshold required:** 0.621268 (current_best × 0.9975)
+**Result:** Marginal regression — 0.623085 > 0.622824 (+0.04%). L1 regularization at 0.1 slightly hurts performance.
+**Decision:** Rejected. train.py reverted to Run 019 state (max_depth=2, lr=0.05).
+
+---
+
+### Run 030 — 2026-05-11
+**Change:** Set reg_alpha=1.0. max_depth=2, lr=0.05, 23-feature set unchanged.
+**Val log loss:** 0.624103
+**Current best (Week 5 block):** 0.622824 (Run 019)
+**Threshold required:** 0.621268 (current_best × 0.9975)
+**Result:** Regression — 0.624103 > 0.622824 (+0.20%). Strong L1 penalty removes useful signal.
+**Decision:** Rejected. train.py reverted to Run 019 state (max_depth=2, lr=0.05). Week 5 block complete.
+
+---
+
+### Run 031 — 2026-05-11
+**Change:** Set n_estimators=200. max_depth=2, lr=0.05, 23-feature set unchanged.
+**Val log loss:** 0.623647
+**Current best:** 0.622824 (Run 019)
+**Threshold required:** 0.621268 (current_best × 0.9975)
+**Result:** Regression — 0.623647 > 0.622824 (+0.13%). More trees at lr=0.05 overfit; 200 trees worse than 100.
+**Decision:** Rejected. train.py reverted to Run 019 state (max_depth=2, lr=0.05).
+
+---
+
+### Run 032 — 2026-05-11
+**Change:** Set n_estimators=150. max_depth=2, lr=0.05, 23-feature set unchanged.
+**Val log loss:** 0.623662
+**Current best:** 0.622824 (Run 019)
+**Threshold required:** 0.621268 (current_best × 0.9975)
+**Result:** Regression — 0.623662 > 0.622824 (+0.13%). Nearly identical to Run 031; n_estimators >100 consistently hurts at lr=0.05.
+**Decision:** Rejected. train.py reverted to Run 019 state (max_depth=2, lr=0.05).
+
+---
+
+### Run 033 — 2026-05-11
+**Change:** Set n_estimators=75 (second queue item labeled 032). max_depth=2, lr=0.05, 23-feature set unchanged.
+**Val log loss:** 0.623293
+**Current best:** 0.622824 (Run 019)
+**Threshold required:** 0.621268 (current_best × 0.9975)
+**Result:** Regression — 0.623293 > 0.622824 (+0.08%). Fewer trees also hurt; 100 is optimal at lr=0.05.
+**Decision:** Rejected. train.py reverted to Run 019 state (max_depth=2, lr=0.05).
+
+---
+
+### Run 034 — 2026-05-11
+**Change:** Set max_depth=3, lr=0.05 (lr already accepted; actual change is max_depth=2→3). 23-feature set unchanged.
+**Val log loss:** 0.624253
+**Current best:** 0.622824 (Run 019)
+**Threshold required:** 0.621268 (current_best × 0.9975)
+**Result:** Regression — 0.624253 > 0.622824 (+0.23%). max_depth=3 overfits on this feature set regardless of lr.
+**Decision:** Rejected. train.py reverted to Run 019 state (max_depth=2, lr=0.05).
+
+---
+
+### Run 035 — 2026-05-11
+**Change:** Set learning_rate=0.03. max_depth=2, 23-feature set unchanged.
+**Val log loss:** 0.624499
+**Current best:** 0.622824 (Run 019)
+**Threshold required:** 0.621268 (current_best × 0.9975)
+**Result:** Regression — 0.624499 > 0.622824 (+0.27%). lr=0.03 is worse than lr=0.05; confirms 0.05 is optimal at 100 trees.
+**Decision:** Rejected. train.py reverted to Run 019 state (max_depth=2, lr=0.05).
+
+---
+
+### Run 036 — 2026-05-11
+**Change:** Set learning_rate=0.07. max_depth=2, 23-feature set unchanged.
+**Val log loss:** 0.624293
+**Current best:** 0.622824 (Run 019)
+**Threshold required:** 0.621268 (current_best × 0.9975)
+**Result:** Regression — 0.624293 > 0.622824 (+0.24%). Both directions from 0.05 are worse; 0.05 is optimal at 100 trees.
+**Decision:** Rejected. train.py reverted to Run 019 state (max_depth=2, lr=0.05).
+
+---
+
+### Run 037 — 2026-05-11
+**Change:** Set learning_rate=0.02. max_depth=2, 23-feature set unchanged.
+**Val log loss:** 0.630057
+**Current best:** 0.622824 (Run 019)
+**Threshold required:** 0.621268 (current_best × 0.9975)
+**Result:** Significant regression — 0.630057 > 0.622824 (+1.17%). lr=0.02 underfits with 100 trees; model cannot converge.
+**Decision:** Rejected. train.py reverted to Run 019 state (max_depth=2, lr=0.05).
+
+---
+
+### Run 038 — 2026-05-11
+**Change:** Set min_child_weight=3. max_depth=2, lr=0.05, 23-feature set unchanged.
+**Val log loss:** 0.622155
+**Current best:** 0.622824 (Run 019)
+**Threshold required:** 0.621268 (current_best × 0.9975)
+**Result:** Improvement of 0.11% (0.622824 → 0.622155) — below the 0.25% minimum threshold.
+**Decision:** Rejected. train.py reverted to Run 019 state. best_meta.json restored to run_24 (0.622824).
+
+---
+
+### Run 039 — 2026-05-11
+**Change:** Set min_child_weight=4. max_depth=2, lr=0.05, 23-feature set unchanged.
+**Val log loss:** 0.621710
+**Current best:** 0.622824 (Run 019)
+**Threshold required:** 0.621268 (current_best × 0.9975)
+**Result:** Improvement of 0.18% (0.622824 → 0.621710) — below the 0.25% minimum threshold. Closest near-miss in the block.
+**Decision:** Rejected. train.py reverted to Run 019 state. best_meta.json restored to run_24 (0.622824).
+
+---
+
+### Run 040 — 2026-05-11
+**Change:** Set subsample=0.7. max_depth=2, lr=0.05, 23-feature set unchanged.
+**Val log loss:** 0.625850
+**Current best:** 0.622824 (Run 019)
+**Threshold required:** 0.621268 (current_best × 0.9975)
+**Result:** Regression — 0.625850 > 0.622824 (+0.49%). subsample=0.7 worse than 0.6 and 0.8; all row subsampling hurts.
+**Decision:** Rejected. train.py reverted to Run 019 state (max_depth=2, lr=0.05). Week 6 block complete.
+
+---
+
+### Run 041 — 2026-05-11
+**Change:** Removed all window-16 rolling features (pts_scored_16, pts_allowed_16, win_pct_16 for home and away). 23 → 17 features.
+**Val log loss:** 0.621545
+**Current best:** 0.622824 (Run 019)
+**Threshold required:** 0.621268 (current_best × 0.9975)
+**Result:** Improvement of 0.205% (0.622824 → 0.621545) — below the 0.25% threshold by only 0.000277. Narrowest near-miss of all runs.
+**Decision:** Rejected. train.py reverted to full 23-feature set. best_meta.json restored to run_24 (0.622824).
+
+---
+
+### Run 042 — 2026-05-11
+**Change:** Removed all window-4 rolling features (pts_scored_4, pts_allowed_4, win_pct_4 for home and away). 23 → 17 features.
+**Val log loss:** 0.626109
+**Current best:** 0.622824 (Run 019)
+**Threshold required:** 0.621268 (current_best × 0.9975)
+**Result:** Regression — 0.626109 > 0.622824 (+0.53%). Short-window features carry signal; removing them hurts.
+**Decision:** Rejected. train.py reverted to full 23-feature set.
+
+---
+
+### Run 043 — 2026-05-11
+**Change:** Removed all pts_allowed rolling features (home/away pts_allowed_4/8/16). 23 → 17 features.
+**Val log loss:** 0.621625
+**Current best:** 0.622824 (Run 019)
+**Threshold required:** 0.621268 (current_best × 0.9975)
+**Result:** Improvement of 0.192% (0.622824 → 0.621625) — below the 0.25% minimum threshold.
+**Decision:** Rejected. train.py reverted to full 23-feature set. best_meta.json restored to run_24 (0.622824).
+
+---
+
+### Run 044 — 2026-05-11
+**Change:** Removed all pts_scored rolling features (home/away pts_scored_4/8/16). 23 → 17 features.
+**Val log loss:** 0.625224
+**Current best:** 0.622824 (Run 019)
+**Threshold required:** 0.621268 (current_best × 0.9975)
+**Result:** Regression — 0.625224 > 0.622824 (+0.38%). pts_scored carries more signal than pts_allowed.
+**Decision:** Rejected. train.py reverted to full 23-feature set.
+
+---
+
+### Run 045 — 2026-05-11
+**Change:** Removed all pts_scored and pts_allowed features; kept baseline + win_pct_4/8/16 + rest_days. 23 → 11 features.
+**Val log loss:** 0.622987
+**Current best:** 0.622824 (Run 019)
+**Threshold required:** 0.621268 (current_best × 0.9975)
+**Result:** Marginal regression — 0.622987 > 0.622824 (+0.03%). Remarkable: 11 features nearly match 23; scoring adds almost no signal.
+**Decision:** Rejected. train.py reverted to full 23-feature set.
+
+---
+
+### Run 046 — 2026-05-11
+**Change:** Removed all away rolling features (away_pts_scored/allowed_4/8/16, away_win_pct_4/8/16). 23 → 14 features.
+**Val log loss:** 0.622828
+**Current best:** 0.622824 (Run 019)
+**Threshold required:** 0.621268 (current_best × 0.9975)
+**Result:** Regression of 0.000004 — functionally identical. Away rolling features add near-zero signal.
+**Decision:** Rejected. train.py reverted to full 23-feature set.
+
+---
+
+### Run 047 — 2026-05-11
+**Change:** Removed all home rolling features (home_pts_scored/allowed_4/8/16, home_win_pct_4/8/16). 23 → 14 features.
+**Val log loss:** 0.633376
+**Current best:** 0.622824 (Run 019)
+**Threshold required:** 0.621268 (current_best × 0.9975)
+**Result:** Significant regression — 0.633376 > 0.622824 (+1.69%). Home rolling features are far more informative than away features.
+**Decision:** Rejected. train.py reverted to full 23-feature set.
+
+---
+
+### Run 048 — 2026-05-11
+**Change:** Removed home_rest_days and away_rest_days. 23 → 21 features. rest_diff baseline retained.
+**Val log loss:** 0.621985
+**Current best:** 0.622824 (Run 019)
+**Threshold required:** 0.621268 (current_best × 0.9975)
+**Result:** Improvement of 0.135% (0.622824 → 0.621985) — below the 0.25% minimum threshold.
+**Decision:** Rejected. train.py reverted to full 23-feature set. best_meta.json restored to run_24 (0.622824).
+
+---
+
+### Run 049 — 2026-05-11
+**Change:** Features reduced to baseline + home_win_pct_8 + away_win_pct_8 only. 23 → 5 features.
+**Val log loss:** 0.624457
+**Current best:** 0.622824 (Run 019)
+**Threshold required:** 0.621268 (current_best × 0.9975)
+**Result:** Regression — 0.624457 > 0.622824 (+0.26%). Too sparse; loses more signal than the 11-feature set (Run 045).
+**Decision:** Rejected. train.py reverted to full 23-feature set.
+
+---
+
+### Run 050 — 2026-05-11
+**Change:** Features reduced to baseline + home/away_pts_scored_8 + home/away_pts_allowed_8. 23 → 7 features.
+**Val log loss:** 0.624329
+**Current best:** 0.622824 (Run 019)
+**Threshold required:** 0.621268 (current_best × 0.9975)
+**Result:** Regression — 0.624329 > 0.622824 (+0.24%). 8-game scoring window alone insufficient; better than 5-feature set but still regresses.
+**Decision:** Rejected. train.py reverted to full 23-feature set.
+
+---
+
+### Run 051 — 2026-05-11
+**Change:** Removed all _16 rolling features + set min_child_weight=4. 23 → 17 features.
+**Val log loss:** 0.621506
+**Current best:** 0.622824 (Run 019)
+**Threshold required:** 0.621268 (current_best × 0.9975)
+**Result:** Improvement of 0.212% (0.622824 → 0.621506) — missed threshold by 0.000238. Less than additive combination.
+**Decision:** Rejected. train.py reverted to Run 019 state. best_meta.json restored to run_24 (0.622824).
+
+---
+
+### Run 052 — 2026-05-11
+**Change:** Removed all _16 rolling features AND all pts_allowed features. 23 → 13 features.
+**Val log loss:** 0.621487
+**Current best:** 0.622824 (Run 019)
+**Threshold required:** 0.621268 (current_best × 0.9975)
+**Result:** Improvement of 0.215% (0.622824 → 0.621487) — missed threshold by 0.000219. Best result so far but still below.
+**Decision:** Rejected. train.py reverted to Run 019 state. best_meta.json restored to run_24 (0.622824).
+
+---
+
+### Run 053 — 2026-05-11
+**Change:** Removed all pts_allowed features + set min_child_weight=4. 23 → 17 features.
+**Val log loss:** 0.622266
+**Current best:** 0.622824 (Run 019)
+**Threshold required:** 0.621268 (current_best × 0.9975)
+**Result:** Improvement of 0.09% only. Worse than either change alone — negative interaction.
+**Decision:** Rejected. train.py reverted to Run 019 state. best_meta.json restored to run_24 (0.622824).
+
+---
+
+### Run 054 — 2026-05-11
+**Change:** Removed all _16 rolling features + all pts_allowed features + set min_child_weight=4. 23 → 13 features.
+**Val log loss:** 0.622366
+**Current best:** 0.622824 (Run 019)
+**Threshold required:** 0.621268 (current_best × 0.9975)
+**Result:** Only 0.07% improvement — worse than any two-way combo. Diminishing returns with combinations.
+**Decision:** Rejected. train.py reverted to Run 019 state. best_meta.json restored to run_24 (0.622824).
+
+---
+
+### Run 055 — 2026-05-11
+**Change:** Removed all _16 rolling features + set colsample_bytree=0.6. 23 → 17 features.
+**Val log loss:** 0.622353
+**Current best:** 0.622824 (Run 019)
+**Threshold required:** 0.621268 (current_best × 0.9975)
+**Result:** Only 0.076% improvement — far less than additive. Column subsampling negates feature pruning benefit.
+**Decision:** Rejected. train.py reverted to Run 019 state. best_meta.json restored to run_24 (0.622824).
+
+---
+
+### Run 056 — 2026-05-11
+**Change:** Removed all _16 rolling features AND home/away_rest_days. 23 → 15 features.
+**Val log loss:** 0.621538
+**Current best:** 0.622824 (Run 019)
+**Threshold required:** 0.621268 (current_best × 0.9975)
+**Result:** Improvement of 0.206% (0.622824 → 0.621538) — missed threshold by 0.000270.
+**Decision:** Rejected. train.py reverted to Run 019 state. best_meta.json restored to run_24 (0.622824).
+
+---
+
+### Run 057 — 2026-05-11
+**Change:** Removed all _16 rolling features + all pts_allowed features + home/away_rest_days. 23 → 11 features.
+**Val log loss:** 0.622442
+**Current best:** 0.622824 (Run 019)
+**Threshold required:** 0.621268 (current_best × 0.9975)
+**Result:** Only 0.061% improvement. Three-way feature removals show strongly diminishing returns.
+**Decision:** Rejected. train.py reverted to Run 019 state. best_meta.json restored to run_24 (0.622824).
+
+---
+
+### Run 058 — 2026-05-11
+**Change:** Removed all pts_allowed features + set colsample_bytree=0.6. 23 → 17 features.
+**Val log loss:** 0.622866
+**Current best:** 0.622824 (Run 019)
+**Threshold required:** 0.621268 (current_best × 0.9975)
+**Result:** Marginal regression (+0.006%). colsample_bytree cancels the pts_allowed removal benefit entirely.
+**Decision:** Rejected. train.py reverted to Run 019 state.
+
+---
+
+### Run 059 — 2026-05-11
+**Change:** Removed all _16 rolling features + all pts_allowed features + set min_child_weight=4 + colsample_bytree=0.6. 23 → 13 features.
+**Val log loss:** 0.621703
+**Current best:** 0.622824 (Run 019)
+**Threshold required:** 0.621268 (current_best × 0.9975)
+**Result:** Improvement of 0.180% — worse than Run 052 (two-way combo). Adding more changes actively hurts.
+**Decision:** Rejected. train.py reverted to Run 019 state. best_meta.json restored to run_24 (0.622824).
+
+---
+
+### Run 060 — 2026-05-11
+**Change:** Removed all _16 rolling features + all pts_allowed features + home/away_rest_days + set min_child_weight=4. 23 → 11 features.
+**Val log loss:** 0.622918
+**Current best:** 0.622824 (Run 019)
+**Threshold required:** 0.621268 (current_best × 0.9975)
+**Result:** Regression (+0.015%). Most aggressive combination is worst result — four-way changes degrade the model. Best combination remains Run 052 (two-way: no window-16 + no pts_allowed).
+**Decision:** Rejected. train.py reverted to Run 019 state.

@@ -47,3 +47,15 @@ Goal for Next Week: Get a success and improve the general process
 
 Week 5
 
+Goal: Improve Log loss through autonomous block
+What I Tried:
+- Hyperparameter Tuning
+- Feature Selection
+- Combining Hyperparameter tuning + feature selection
+
+Observations:
+- Minimal hyperparameter tuning was needed to decrease log_loss significantly
+- Feature selection did not improve log_loss enough to take out any features
+- Removing the minimum acceptance threshold will improve the model for when I aim to get the best possible model
+
+Goal for Next Week: Continue improving the model

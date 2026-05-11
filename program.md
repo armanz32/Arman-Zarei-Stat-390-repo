@@ -63,6 +63,7 @@ Week 5 Experiment Block:
 Goal: Explore XGBoost as a replacement model and tune hyperparameters
 Threshold: 0.25% better than the baseline
 011: Swap model to XGBoost, all default params, keep current feature set
+011b: Add rolling scoring: home/away_pts_scored/allowed_4/8/16, rolling win%: home/away_win_pct_4/8/16, and rest detail: home_rest_days, away_rest_days features
 012: Set max_depth = 2
 013: Set max_depth = 4
 014: Set max_depth = 6
@@ -82,6 +83,36 @@ Threshold: 0.25% better than the baseline
 028: Set reg_lambda = 5
 029: Set reg_alpha = 0.1
 030: Set reg_alpha = 1.0
+031: Set n_estimators=200
+032: Set n_estimators=150
+032: Set n_estimators=75
+034: Set max_depth=3, lr=0.05
+035: Set lr=0.03
+036: Set lr=0.07
+037: Set lr=0.02
+038: Set min_child_weight=3
+039: Set min_child_weight=4
+040: Set subsample=0.7
+041: Remove all window-16 features (keep only 4 and 8 game windows)
+042: Remove all window-4 features (keep only 8 and 16 game windows)
+043: Remove pts_allowed features (keep only pts_scored and win_pct)
+044: Remove pts_scored features (keep only pts_allowed and win_pct)
+045: Remove all scoring features, keep only win_pct + baseline
+046: Remove away rolling features entirely
+047: Remove home rolling features entirely
+048: Remove rest_days features
+049: Keep only baseline + win_pct_8
+050: Keep only baseline + pts_scored_8 + pts_allowed_8
+051: Remove window-16 features + set min_child_weight=4
+052: Remove window-16 features + remove pts_allowed features
+053: Remove pts_allowed features + set min_child_weight=4
+054: Remove window-16 features + remove pts_allowed features + set min_child_weight=4
+055: Remove window-16 features + set colsample_bytree=0.6
+056: Remove window-16 features + remove rest_days features
+057: Remove window-16 features + remove pts_allowed features + remove rest_days features
+058: Remove pts_allowed features + set colsample_bytree=0.6
+059: Remove window-16 features + remove pts_allowed features + set min_child_weight=4 + set colsample_bytree=0.6
+060: Remove window-16 features + remove pts_allowed features + set min_child_weight=4 + remove rest_days features
 
 Iteration Log
 Append one entry per run. Do not edit previous entries.
@@ -176,3 +207,410 @@ CV mean ± std: [0.648547] ± [0.006189]
 Accepted: No
 Notes: Improvement of ~0.18% (0.623589 → 0.622446) — below the 1.5% threshold (0.614135). Dropping rest_diff marginally helps, suggesting it adds slight noise, but the gain is well below the bar. train.py reverted to 3-feature baseline. best_meta.json restored to run_0 (0.623589).
 
+Run 011 — XGBoost, all default parameters, 3-feature baseline
+Date: [5/11/2026]
+Change: Swapped model from logistic regression to XGBoost with all default parameters (random_state=42, eval_metric=logloss). Features unchanged: elo_diff, home_game, rest_diff.
+Val log loss: [0.665846]
+CV mean ± std: [0.697022] ± [0.009262]
+Accepted: Yes (required Week 5 XGBoost baseline — accepted regardless of threshold)
+Notes: Regression — XGBoost defaults (0.665846) are substantially worse than baseline logistic regression (0.623589), +6.78%. Default XGBoost (n_estimators=100, max_depth=6, learning_rate=0.3) overfits on only 3 features. Change retained as mandated Week 5 baseline; subsequent runs will tune hyperparameters.
+
+Run 011b — XGBoost, all default parameters, full 23-feature set
+Date: [5/11/2026]
+Change: Kept XGBoost with all default parameters. Expanded features from 3 to 23: added rolling pts scored/allowed (home/away, windows 4/8/16), rolling win% (home/away, windows 4/8/16), and home_rest_days/away_rest_days. Rolling features computed in-memory on combined train+val sorted by game_date to avoid leakage at season boundary.
+Val log loss: [0.702775]
+CV mean ± std: [0.767613] ± [0.022218]
+Accepted: Yes (required full-feature Week 5 baseline — accepted regardless of threshold)
+Notes: Further regression — XGBoost defaults with 23 features (0.702775) are worse than Run 011 (0.665846, +5.56%) and substantially worse than baseline logistic regression (0.623589, +12.70%). High CV std (0.022) indicates instability. Default XGBoost severely overfits on the expanded feature set. Retained as mandated full-feature Week 5 baseline; hyperparameter tuning runs (012–030) will attempt to recover.
+
+Run 012 — XGBoost max_depth=2, 23-feature set
+Date: [5/11/2026]
+Change: Set max_depth=2 in XGBoost model_config. All other settings unchanged (23 features, all other params default).
+Val log loss: [0.647696]
+CV mean ± std: [0.649534] ± [0.010045]
+Accepted: Yes (7.84% improvement vs Week 5 block baseline 011b: 0.702775 → 0.647696; threshold 0.701019)
+Notes: Shallower trees dramatically reduce overfitting — CV std drops from 0.022 to 0.010 and val loss improves by 7.84% vs 011b. Still above the overall logistic regression best (0.623589) but accepted per Week 5 block decision rule. New block best: 0.647696.
+
+Run 013 — XGBoost max_depth=4, 23-feature set
+Date: [5/11/2026]
+Change: Set max_depth=4 in XGBoost model_config. All other settings unchanged (23 features, all other params default).
+Val log loss: [0.676621]
+CV mean ± std: [0.695058] ± [0.015476]
+Accepted: No
+Notes: Regression vs Run 012 (0.647696 → 0.676621, +4.47%). Deeper trees re-introduce overfitting — CV std rises from 0.010 to 0.015. max_depth=4 is worse than max_depth=2 on this feature set. train.py reverted to Run 012 state (max_depth=2).
+
+Run 014 — XGBoost max_depth=6, 23-feature set
+Date: [5/11/2026]
+Change: Set max_depth=6 in XGBoost model_config. All other settings unchanged (23 features, all other params default).
+Val log loss: [0.702775]
+CV mean ± std: [0.767613] ± [0.022218]
+Accepted: No
+Notes: Identical result to Run 011b (0.702775) — XGBoost's default max_depth is 6, so this is the same configuration. Confirmed that max_depth=6 is the worst setting tested; max_depth=2 (Run 012) is the current block best. train.py reverted to Run 012 state (max_depth=2).
+
+Run 015 — XGBoost max_depth=2, n_estimators=100
+Date: [5/11/2026]
+Change: Set n_estimators=100 explicitly. All other settings: max_depth=2, 23 features, other params default.
+Val log loss: [0.647696]
+CV mean ± std: [0.649534] ± [0.010045]
+Accepted: No
+Notes: Identical result to Run 012 — n_estimators=100 is the XGBoost default, so no change was actually made. train.py reverted to Run 012 state (max_depth=2, no explicit n_estimators).
+
+Run 016 — XGBoost max_depth=2, n_estimators=300
+Date: [5/11/2026]
+Change: Set n_estimators=300. All other settings: max_depth=2, 23 features, other params default.
+Val log loss: [0.663226]
+CV mean ± std: [0.674836] ± [0.013239]
+Accepted: No
+Notes: Regression vs Run 012 (+2.39%). More trees with depth=2 overfit — CV std rises from 0.010 to 0.013. train.py reverted to Run 012 state (max_depth=2).
+
+Run 017 — XGBoost max_depth=2, n_estimators=500
+Date: [5/11/2026]
+Change: Set n_estimators=500. All other settings: max_depth=2, 23 features, other params default.
+Val log loss: [0.687740]
+CV mean ± std: [0.701497] ± [0.016145]
+Accepted: No
+Notes: Regression vs Run 012 (+6.19%). n_estimators monotonically worsens performance — 100 < 300 < 500 trees all degrade. Overfitting increases with each additional tree at depth=2. train.py reverted to Run 012 state.
+
+Run 018 — XGBoost max_depth=2, learning_rate=0.01
+Date: [5/11/2026]
+Change: Set learning_rate=0.01. All other settings: max_depth=2, 23 features, n_estimators default (100).
+Val log loss: [0.643467]
+CV mean ± std: [0.653252] ± [0.004871]
+Accepted: Yes (-0.65% vs Run 012 block best: 0.647696 → 0.643467; threshold 0.646077)
+Notes: Slow learning rate dramatically reduces variance — CV std drops to 0.005 (lowest yet). Lower lr forces conservative updates, better generalization. New block best: 0.643467.
+
+Run 019 — XGBoost max_depth=2, learning_rate=0.05
+Date: [5/11/2026]
+Change: Set learning_rate=0.05. All other settings: max_depth=2, 23 features, n_estimators default (100).
+Val log loss: [0.622824]
+CV mean ± std: [0.635533] ± [0.007571]
+Accepted: Yes (-3.19% vs Run 018: 0.643467 → 0.622824; threshold 0.641857)
+Notes: First run to beat the original logistic regression baseline (0.623589 → 0.622824). lr=0.05 better balances bias-variance than lr=0.01 with 100 trees. New best: 0.622824.
+
+Run 020 — XGBoost max_depth=2, learning_rate=0.3
+Date: [5/11/2026]
+Change: Set learning_rate=0.3. All other settings: max_depth=2, 23 features, n_estimators default (100).
+Val log loss: [0.647696]
+CV mean ± std: [0.649534] ± [0.010045]
+Accepted: No
+Notes: lr=0.3 is the XGBoost default — identical result to Run 012 (0.647696). Confirms default learning rate is too aggressive for this feature set. train.py reverted to Run 019 state (lr=0.05).
+
+Run 021 — XGBoost max_depth=2, lr=0.05, subsample=0.6
+Date: [5/11/2026]
+Change: Set subsample=0.6. All other settings: max_depth=2, lr=0.05, 23 features, n_estimators default (100).
+Val log loss: [0.623504]
+CV mean ± std: [0.634973] ± [0.008547]
+Accepted: No
+Notes: Marginal regression vs Run 019 (+0.11%: 0.622824 → 0.623504). Subsampling 60% of rows does not help — insufficient data variation benefit at this tree count. train.py reverted to Run 019 state.
+
+Run 022 — XGBoost max_depth=2, lr=0.05, subsample=0.8
+Date: [5/11/2026]
+Change: Set subsample=0.8. All other settings: max_depth=2, lr=0.05, 23 features, n_estimators default (100).
+Val log loss: [0.623846]
+CV mean ± std: [0.634881] ± [0.008767]
+Accepted: No
+Notes: Regression vs Run 019 (+0.16%: 0.622824 → 0.623846). subsample=0.8 slightly worse than subsample=0.6; both fail to improve on Run 019. Subsampling hurts at this n_estimators. train.py reverted to Run 019 state.
+
+Run 023 — XGBoost max_depth=2, lr=0.05, colsample_bytree=0.6
+Date: [5/11/2026]
+Change: Set colsample_bytree=0.6. All other settings: max_depth=2, lr=0.05, 23 features, n_estimators default (100).
+Val log loss: [0.621875]
+CV mean ± std: [0.635448] ± [0.007824]
+Accepted: No
+Notes: Improvement of 0.15% (0.622824 → 0.621875) — below the 0.25% threshold (0.621268). Column subsampling at 60% is close but misses the bar. train.py reverted to Run 019 state. best_meta.json restored to run_24 (0.622824).
+
+Run 024 — XGBoost max_depth=2, lr=0.05, colsample_bytree=0.8
+Date: [5/11/2026]
+Change: Set colsample_bytree=0.8. All other settings: max_depth=2, lr=0.05, 23 features, n_estimators default (100).
+Val log loss: [0.624324]
+CV mean ± std: [0.635505] ± [0.007819]
+Accepted: No
+Notes: Regression vs Run 019 (+0.24%: 0.622824 → 0.624324). colsample_bytree=0.8 worse than 0.6 and both fail vs no subsampling. train.py reverted to Run 019 state.
+
+Run 025 — XGBoost max_depth=2, lr=0.05, min_child_weight=2
+Date: [5/11/2026]
+Change: Set min_child_weight=2. All other settings: max_depth=2, lr=0.05, 23 features, n_estimators default (100).
+Val log loss: [0.622572]
+CV mean ± std: [0.635425] ± [0.007687]
+Accepted: No
+Notes: Improvement of 0.04% (0.622824 → 0.622572) — below the 0.25% threshold (0.621268). Raising minimum leaf weight slightly helps but not enough. train.py reverted to Run 019 state. best_meta.json restored.
+
+Run 026 — XGBoost max_depth=2, lr=0.05, min_child_weight=5
+Date: [5/11/2026]
+Change: Set min_child_weight=5. All other settings: max_depth=2, lr=0.05, 23 features, n_estimators default (100).
+Val log loss: [0.622013]
+CV mean ± std: [0.635316] ± [0.007925]
+Accepted: No
+Notes: Improvement of 0.13% (0.622824 → 0.622013) — below the 0.25% threshold (0.621268). min_child_weight=5 slightly better than =2 (0.622572) but both miss the bar. train.py reverted to Run 019 state. best_meta.json restored.
+
+Run 027 — XGBoost max_depth=2, lr=0.05, reg_lambda=1
+Date: [5/11/2026]
+Change: Set reg_lambda=1. All other settings: max_depth=2, lr=0.05, 23 features, n_estimators default (100).
+Val log loss: [0.622824]
+CV mean ± std: [0.635533] ± [0.007571]
+Accepted: No
+Notes: Identical to Run 019 — reg_lambda=1 is the XGBoost default. No change in performance. train.py reverted to Run 019 state.
+
+Run 028 — XGBoost max_depth=2, lr=0.05, reg_lambda=5
+Date: [5/11/2026]
+Change: Set reg_lambda=5. All other settings: max_depth=2, lr=0.05, 23 features, n_estimators default (100).
+Val log loss: [0.622305]
+CV mean ± std: [0.635578] ± [0.007474]
+Accepted: No
+Notes: Improvement of 0.08% (0.622824 → 0.622305) — below the 0.25% threshold (0.621268). Heavier L2 penalty marginally helps but not enough. train.py reverted to Run 019 state. best_meta.json restored.
+
+Run 029 — XGBoost max_depth=2, lr=0.05, reg_alpha=0.1
+Date: [5/11/2026]
+Change: Set reg_alpha=0.1. All other settings: max_depth=2, lr=0.05, 23 features, n_estimators default (100).
+Val log loss: [0.623085]
+CV mean ± std: [0.635582] ± [0.007679]
+Accepted: No
+Notes: Marginal regression vs Run 019 (+0.04%: 0.622824 → 0.623085). L1 regularization at 0.1 slightly hurts. train.py reverted to Run 019 state.
+
+Run 030 — XGBoost max_depth=2, lr=0.05, reg_alpha=1.0
+Date: [5/11/2026]
+Change: Set reg_alpha=1.0. All other settings: max_depth=2, lr=0.05, 23 features, n_estimators default (100).
+Val log loss: [0.624103]
+CV mean ± std: [0.635321] ± [0.007747]
+Accepted: No
+Notes: Regression vs Run 019 (+0.20%: 0.622824 → 0.624103). Strong L1 penalty hurts — sparsity regularization removes useful signal. Week 5 hyperparameter block complete. train.py reverted to Run 019 state (final accepted: max_depth=2, lr=0.05).
+
+Run 031 — XGBoost max_depth=2, lr=0.05, n_estimators=200
+Date: [5/11/2026]
+Change: Set n_estimators=200. All other settings: max_depth=2, lr=0.05, 23 features.
+Val log loss: [0.623647]
+CV mean ± std: [0.637780] ± [0.008369]
+Accepted: No
+Notes: Regression vs Run 019 (+0.13%: 0.622824 → 0.623647). More trees at lr=0.05 begin to overfit — CV std rises from 0.008 to 0.008. 200 trees is worse than 100 with this lr. train.py reverted to Run 019 state.
+
+Run 032 — XGBoost max_depth=2, lr=0.05, n_estimators=150
+Date: [5/11/2026]
+Change: Set n_estimators=150. All other settings: max_depth=2, lr=0.05, 23 features.
+Val log loss: [0.623662]
+CV mean ± std: [0.636409] ± [0.007941]
+Accepted: No
+Notes: Regression vs Run 019 (+0.13%: 0.622824 → 0.623662). Nearly identical to Run 031 (200 trees). n_estimators between 100 and 200 consistently hurt at lr=0.05. train.py reverted to Run 019 state.
+
+Run 033 — XGBoost max_depth=2, lr=0.05, n_estimators=75
+Date: [5/11/2026]
+Change: Set n_estimators=75 (second queue item labeled 032). All other settings: max_depth=2, lr=0.05, 23 features.
+Val log loss: [0.623293]
+CV mean ± std: [0.636497] ± [0.007465]
+Accepted: No
+Notes: Regression vs Run 019 (+0.08%: 0.622824 → 0.623293). Fewer trees also hurts — 100 is optimal at lr=0.05; both directions (75 and 150+) are worse. train.py reverted to Run 019 state.
+
+Run 034 — XGBoost max_depth=3, lr=0.05
+Date: [5/11/2026]
+Change: Set max_depth=3 (lr=0.05 unchanged from accepted state). 23 features unchanged.
+Val log loss: [0.624253]
+CV mean ± std: [0.636845] ± [0.006990]
+Accepted: No
+Notes: Regression vs Run 019 (+0.23%: 0.622824 → 0.624253). max_depth=3 consistently overfits on this 23-feature set regardless of lr. max_depth=2 remains optimal. train.py reverted to Run 019 state.
+
+Run 035 — XGBoost max_depth=2, lr=0.03
+Date: [5/11/2026]
+Change: Set learning_rate=0.03. All other settings: max_depth=2, 23 features, n_estimators default (100).
+Val log loss: [0.624499]
+CV mean ± std: [0.638115] ± [0.007225]
+Accepted: No
+Notes: Regression vs Run 019 (+0.27%: 0.622824 → 0.624499). lr=0.03 is between 0.01 and 0.05; both of those were tested and 0.05 was better. Confirms lr=0.05 is the optimal learning rate at 100 trees. train.py reverted to Run 019 state.
+
+Run 036 — XGBoost max_depth=2, lr=0.07
+Date: [5/11/2026]
+Change: Set learning_rate=0.07. All other settings: max_depth=2, 23 features, n_estimators default (100).
+Val log loss: [0.624293]
+CV mean ± std: [0.636346] ± [0.008184]
+Accepted: No
+Notes: Regression vs Run 019 (+0.24%: 0.622824 → 0.624293). lr=0.07 is slightly faster than 0.05 and worse. Both directions (0.03 and 0.07) from 0.05 are worse, confirming 0.05 is optimal at 100 trees. train.py reverted to Run 019 state.
+
+Run 037 — XGBoost max_depth=2, lr=0.02
+Date: [5/11/2026]
+Change: Set learning_rate=0.02. All other settings: max_depth=2, 23 features, n_estimators default (100).
+Val log loss: [0.630057]
+CV mean ± std: [0.642843] ± [0.006562]
+Accepted: No
+Notes: Significant regression vs Run 019 (+1.17%: 0.622824 → 0.630057). lr=0.02 underfits with only 100 trees — the model cannot converge in time. Would require many more trees to compensate. train.py reverted to Run 019 state.
+
+Run 038 — XGBoost max_depth=2, lr=0.05, min_child_weight=3
+Date: [5/11/2026]
+Change: Set min_child_weight=3. All other settings: max_depth=2, lr=0.05, 23 features, n_estimators default (100).
+Val log loss: [0.622155]
+CV mean ± std: [0.635558] ± [0.007767]
+Accepted: No
+Notes: Improvement of 0.11% (0.622824 → 0.622155) — below the 0.25% threshold (0.621268). Sits between min_child_weight=2 (0.04% improvement) and =5 (0.13% improvement); =5 remains the closest near-miss. train.py reverted to Run 019 state. best_meta.json restored.
+
+Run 039 — XGBoost max_depth=2, lr=0.05, min_child_weight=4
+Date: [5/11/2026]
+Change: Set min_child_weight=4. All other settings: max_depth=2, lr=0.05, 23 features, n_estimators default (100).
+Val log loss: [0.621710]
+CV mean ± std: [0.635602] ± [0.007853]
+Accepted: No
+Notes: Improvement of 0.18% (0.622824 → 0.621710) — below the 0.25% threshold (0.621268). Closest near-miss in this block. min_child_weight trend: 2→0.04%, 3→0.11%, 4→0.18%, 5→0.13%; peak signal appears around 4. train.py reverted to Run 019 state. best_meta.json restored.
+
+Run 040 — XGBoost max_depth=2, lr=0.05, subsample=0.7
+Date: [5/11/2026]
+Change: Set subsample=0.7. All other settings: max_depth=2, lr=0.05, 23 features, n_estimators default (100).
+Val log loss: [0.625850]
+CV mean ± std: [0.633866] ± [0.008131]
+Accepted: No
+Notes: Regression vs Run 019 (+0.49%: 0.622824 → 0.625850). subsample=0.7 worse than both 0.6 (Run 021) and 0.8 (Run 022). All subsample values tested (0.6, 0.7, 0.8) hurt performance. Week 6 block complete. train.py reverted to Run 019 state.
+
+Run 041 — Remove window-16 features (17 features)
+Date: [5/11/2026]
+Change: Removed all _16 rolling features (home/away pts_scored_16, pts_allowed_16, win_pct_16). Features: 23 → 17.
+Val log loss: [0.621545]
+CV mean ± std: [0.635023] ± [0.007600]
+Accepted: No
+Notes: Improvement of 0.205% (0.622824 → 0.621545) — below the 0.25% threshold (0.621268) by only 0.000277. Window-16 features add noise rather than signal. Narrowest near-miss of all runs. train.py reverted to full 23-feature set. best_meta.json restored.
+
+Run 042 — Remove window-4 features (17 features)
+Date: [5/11/2026]
+Change: Removed all _4 rolling features (home/away pts_scored_4, pts_allowed_4, win_pct_4). Features: 23 → 17.
+Val log loss: [0.626109]
+CV mean ± std: [0.637144] ± [0.009038]
+Accepted: No
+Notes: Regression vs Run 019 (+0.53%: 0.622824 → 0.626109). Short-window (4-game) features carry useful signal — removing them hurts. Contrast with Run 041 (removing window-16 helped). train.py reverted to full 23-feature set.
+
+Run 043 — Remove pts_allowed features (17 features)
+Date: [5/11/2026]
+Change: Removed all pts_allowed rolling features (home/away pts_allowed_4/8/16). Features: 23 → 17.
+Val log loss: [0.621625]
+CV mean ± std: [0.638089] ± [0.007925]
+Accepted: No
+Notes: Improvement of 0.192% (0.622824 → 0.621625) — below the 0.25% threshold (0.621268). pts_allowed features add marginal noise; pts_scored and win_pct carry most of the signal. Second-closest near-miss alongside Run 041. train.py reverted to full 23-feature set. best_meta.json restored.
+
+Run 044 — Remove pts_scored features (17 features)
+Date: [5/11/2026]
+Change: Removed all pts_scored rolling features (home/away pts_scored_4/8/16). Features: 23 → 17.
+Val log loss: [0.625224]
+CV mean ± std: [0.642175] ± [0.007643]
+Accepted: No
+Notes: Regression vs Run 019 (+0.38%: 0.622824 → 0.625224). pts_scored is more informative than pts_allowed — removing it hurts more (Run 043 removing pts_allowed: +0.19% improvement; this run removing pts_scored: -0.38% regression). train.py reverted to full 23-feature set.
+
+Run 045 — Baseline + win_pct + rest_days only (11 features)
+Date: [5/11/2026]
+Change: Removed all pts_scored and pts_allowed features. Features: 23 → 11 (baseline + win_pct_4/8/16 home+away + rest_days).
+Val log loss: [0.622987]
+CV mean ± std: [0.642895] ± [0.008895]
+Accepted: No
+Notes: Marginal regression (+0.03%: 0.622824 → 0.622987). Remarkable — 11 features nearly match 23. Scoring features add very little. win_pct + baseline captures almost all predictive signal. train.py reverted to full 23-feature set.
+
+Run 046 — Remove away rolling features (14 features)
+Date: [5/11/2026]
+Change: Removed all away rolling features (away_pts_scored/allowed_4/8/16, away_win_pct_4/8/16). Features: 23 → 14.
+Val log loss: [0.622828]
+CV mean ± std: [0.643120] ± [0.008790]
+Accepted: No
+Notes: Regression of 0.0006% (0.622824 → 0.622828). Functionally identical to current best — away rolling features contribute essentially zero net signal. train.py reverted to full 23-feature set.
+
+Run 047 — Remove home rolling features (14 features)
+Date: [5/11/2026]
+Change: Removed all home rolling features (home_pts_scored/allowed_4/8/16, home_win_pct_4/8/16). Features: 23 → 14.
+Val log loss: [0.633376]
+CV mean ± std: [0.647390] ± [0.007312]
+Accepted: No
+Notes: Significant regression (+1.69%: 0.622824 → 0.633376). Sharp asymmetry: home features are far more predictive than away features (Run 046 removing away features: +0.0006%; this run removing home features: +1.69%). train.py reverted to full 23-feature set.
+
+Run 048 — Remove rest_days features (21 features)
+Date: [5/11/2026]
+Change: Removed home_rest_days and away_rest_days. Features: 23 → 21 (rest_diff baseline feature retained).
+Val log loss: [0.621985]
+CV mean ± std: [0.635718] ± [0.007622]
+Accepted: No
+Notes: Improvement of 0.135% (0.622824 → 0.621985) — below the 0.25% threshold (0.621268). home/away_rest_days add marginal noise on top of rest_diff. train.py reverted to full 23-feature set. best_meta.json restored.
+
+Run 049 — Baseline + win_pct_8 only (5 features)
+Date: [5/11/2026]
+Change: Features reduced to baseline + home_win_pct_8 + away_win_pct_8 only.
+Val log loss: [0.624457]
+CV mean ± std: [0.641087] ± [0.010208]
+Accepted: No
+Notes: Regression vs Run 019 (+0.26%: 0.622824 → 0.624457). Too sparse — loses more signal than Run 045 (11 features at 0.622987). Single window win% at 8 games is insufficient. train.py reverted to full 23-feature set.
+
+Run 050 — Baseline + pts_scored_8 + pts_allowed_8 (7 features)
+Date: [5/11/2026]
+Change: Features reduced to baseline + home/away_pts_scored_8 + home/away_pts_allowed_8 only.
+Val log loss: [0.624329]
+CV mean ± std: [0.638002] ± [0.007817]
+Accepted: No
+Notes: Regression vs Run 019 (+0.24%: 0.622824 → 0.624329). 8-game scoring window alone is insufficient. Slightly better than Run 049 (5 features) — scoring at 8 games has more signal than win_pct_8 alone, but still not competitive with the full set. train.py reverted to full 23-feature set.
+
+Run 051 — No window-16 + min_child_weight=4 (17 features)
+Date: [5/11/2026]
+Change: Removed all _16 rolling features AND set min_child_weight=4.
+Val log loss: [0.621506]
+CV mean ± std: [0.634945] ± [0.007781]
+Accepted: No
+Notes: Improvement of 0.212% (0.622824 → 0.621506) — missed threshold by 0.000238. Combining the two best individual near-misses (Run 041: -0.205%, Run 039: -0.179%) yields less than additive improvement. train.py reverted to Run 019 state. best_meta.json restored.
+
+Run 052 — No window-16 + no pts_allowed (13 features)
+Date: [5/11/2026]
+Change: Removed all _16 rolling features AND all pts_allowed features. Features: 23 → 13.
+Val log loss: [0.621487]
+CV mean ± std: [0.637270] ± [0.007484]
+Accepted: No
+Notes: Improvement of 0.215% (0.622824 → 0.621487) — missed threshold by 0.000219. Best result yet but still below the bar. Slightly better than Run 051. train.py reverted to Run 019 state. best_meta.json restored.
+
+Run 053 — No pts_allowed + min_child_weight=4 (17 features)
+Date: [5/11/2026]
+Change: Removed all pts_allowed features AND set min_child_weight=4.
+Val log loss: [0.622266]
+CV mean ± std: [0.638266] ± [0.007660]
+Accepted: No
+Notes: Improvement of only 0.09% (0.622824 → 0.622266) — worse than either change alone (Run 043: -0.192%, Run 039: -0.179%). Negative interaction between removing pts_allowed and raising min_child_weight. train.py reverted to Run 019 state. best_meta.json restored.
+
+Run 054 — No window-16 + no pts_allowed + min_child_weight=4 (13 features)
+Date: [5/11/2026]
+Change: Removed all _16 rolling features, all pts_allowed features, AND set min_child_weight=4.
+Val log loss: [0.622366]
+CV mean ± std: [0.637357] ± [0.007501]
+Accepted: No
+Notes: Improvement of only 0.07% (0.622824 → 0.622366) — worse than any two-way combination. Adding min_child_weight=4 on top of the 052 feature set hurts. The improvements are not additive; diminishing returns with each combination. train.py reverted to Run 019 state. best_meta.json restored.
+
+Run 055 — No window-16 + colsample_bytree=0.6 (17 features)
+Date: [5/11/2026]
+Change: Removed all _16 rolling features AND set colsample_bytree=0.6.
+Val log loss: [0.622353]
+CV mean ± std: [0.634931] ± [0.007963]
+Accepted: No
+Notes: Improvement of only 0.076% (0.622824 → 0.622353) — far less than additive. colsample_bytree negates the feature pruning benefit. Feature set and column subsampling interact negatively. train.py reverted to Run 019 state. best_meta.json restored.
+
+Run 056 — No window-16 + no rest_days (15 features)
+Date: [5/11/2026]
+Change: Removed all _16 rolling features AND home/away_rest_days. Features: 23 → 15.
+Val log loss: [0.621538]
+CV mean ± std: [0.634852] ± [0.007690]
+Accepted: No
+Notes: Improvement of 0.206% (0.622824 → 0.621538) — missed threshold by 0.000270. Consistent with the window-16 removal dominating the improvement; adding rest_days removal provides minimal additional gain. train.py reverted to Run 019 state. best_meta.json restored.
+
+Run 057 — No window-16 + no pts_allowed + no rest_days (11 features)
+Date: [5/11/2026]
+Change: Removed all _16 rolling features, all pts_allowed features, AND home/away_rest_days. Features: 23 → 11.
+Val log loss: [0.622442]
+CV mean ± std: [0.637333] ± [0.007656]
+Accepted: No
+Notes: Only 0.061% improvement (0.622824 → 0.622442). Three-way feature removal continues the pattern of strongly diminishing returns — each additional removal reduces the net benefit. The 052 two-way combo remains the best combination found. train.py reverted to Run 019 state. best_meta.json restored.
+
+Run 058 — No pts_allowed + colsample_bytree=0.6 (17 features)
+Date: [5/11/2026]
+Change: Removed all pts_allowed features AND set colsample_bytree=0.6.
+Val log loss: [0.622866]
+CV mean ± std: [0.637399] ± [0.008561]
+Accepted: No
+Notes: Marginal regression (+0.006%: 0.622824 → 0.622866). colsample_bytree completely cancels out the pts_allowed removal benefit. Column subsampling combined with any feature pruning consistently shows negative interaction. train.py reverted to Run 019 state.
+
+Run 059 — No window-16 + no pts_allowed + min_child_weight=4 + colsample_bytree=0.6 (13 features)
+Date: [5/11/2026]
+Change: Removed all _16 rolling features and all pts_allowed features; set min_child_weight=4 and colsample_bytree=0.6.
+Val log loss: [0.621703]
+CV mean ± std: [0.636615] ± [0.008007]
+Accepted: No
+Notes: Improvement of 0.180% (0.622824 → 0.621703) — worse than Run 052 (0.621487, two-way combo). Four-way combinations are worse than two-way. Adding mcw=4 and cbt=0.6 on top of the 052 feature set actively hurts. train.py reverted to Run 019 state. best_meta.json restored.
+
+Run 060 — No window-16 + no pts_allowed + min_child_weight=4 + no rest_days (11 features)
+Date: [5/11/2026]
+Change: Removed all _16 rolling features, all pts_allowed features, and home/away_rest_days; set min_child_weight=4.
+Val log loss: [0.622918]
+CV mean ± std: [0.637302] ± [0.007721]
+Accepted: No
+Notes: Regression vs Run 019 (+0.015%: 0.622824 → 0.622918). The most aggressive combination is the worst — adding more changes beyond the optimal two-way set (Run 052) consistently degrades. Week 7 combination block complete; best result: Run 052 (0.621487, -0.215%). train.py reverted to Run 019 state.

@@ -1,0 +1,25 @@
+{
+  "run_id": 50,
+  "val_loss": 0.622987,
+  "cv_mean": 0.642895,
+  "cv_std": 0.008895,
+  "features": [
+    "elo_diff",
+    "home_game",
+    "rest_diff",
+    "home_win_pct_4",
+    "home_win_pct_8",
+    "home_win_pct_16",
+    "away_win_pct_4",
+    "away_win_pct_8",
+    "away_win_pct_16",
+    "home_rest_days",
+    "away_rest_days"
+  ],
+  "config": {
+    "type": "xgboost",
+    "max_depth": 2,
+    "learning_rate": 0.05
+  },
+  "runtime_s": 1.12
+}

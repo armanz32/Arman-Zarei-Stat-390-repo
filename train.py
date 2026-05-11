@@ -20,24 +20,68 @@ results_dir.mkdir(parents=True, exist_ok=True)
 best_dir.mkdir(parents=True, exist_ok=True)
 
 baseline_features = ["elo_diff", "home_game", "rest_diff"]
-rolling_features = [
-    "home_score_avg_4", "home_score_avg_8", "home_score_avg_16",
-    "away_score_avg_4", "away_score_avg_8", "away_score_avg_16",
+rolling_features_011b = [
+    "home_pts_scored_4", "home_pts_scored_8", "home_pts_scored_16",
+    "home_pts_allowed_4", "home_pts_allowed_8", "home_pts_allowed_16",
+    "away_pts_scored_4", "away_pts_scored_8", "away_pts_scored_16",
+    "away_pts_allowed_4", "away_pts_allowed_8", "away_pts_allowed_16",
     "home_win_pct_4", "home_win_pct_8", "home_win_pct_16",
+    "away_win_pct_4", "away_win_pct_8", "away_win_pct_16",
+    "home_rest_days", "away_rest_days",
 ]
-features = baseline_features
+features = baseline_features + rolling_features_011b
 
 model_config = {
-    "type": "logistic_regression",
-    "C": 1.0,
-    "max_iter": 1000,
+    "type": "xgboost",
+    "max_depth": 2,
+    "learning_rate": 0.05,
 }
 cv = 5
+
+def compute_rolling_features(df):
+    df = df.sort_values("game_date").reset_index(drop=True)
+    windows = [4, 8, 16]
+    team_history = {}
+    records = []
+    for _, row in df.iterrows():
+        home, away = row["home_team"], row["away_team"]
+        rec = {}
+        for w in windows:
+            for team, prefix in [(home, "home"), (away, "away")]:
+                hist = team_history.get(team, {"scored": [], "allowed": [], "wins": []})
+                sc = hist["scored"][-w:]
+                al = hist["allowed"][-w:]
+                wi = hist["wins"][-w:]
+                rec[f"{prefix}_pts_scored_{w}"] = sum(sc) / len(sc) if sc else None
+                rec[f"{prefix}_pts_allowed_{w}"] = sum(al) / len(al) if al else None
+                rec[f"{prefix}_win_pct_{w}"] = sum(wi) / len(wi) if wi else None
+        records.append(rec)
+        h_won = int(row["home_score"] > row["away_score"])
+        for team, scored, allowed, won in [
+            (home, row["home_score"], row["away_score"], h_won),
+            (away, row["away_score"], row["home_score"], 1 - h_won),
+        ]:
+            if team not in team_history:
+                team_history[team] = {"scored": [], "allowed": [], "wins": []}
+            team_history[team]["scored"].append(scored)
+            team_history[team]["allowed"].append(allowed)
+            team_history[team]["wins"].append(won)
+    rolling_df = pd.DataFrame(records, index=df.index)
+    df = pd.concat([df, rolling_df], axis=1)
+    df = df.fillna(df.median(numeric_only=True))
+    return df
 
 #load data
 def load_data():
     train = pd.read_csv(data_dir / "train.csv")
     val = pd.read_csv(data_dir / "val.csv")
+    train["_split"] = "train"
+    val["_split"] = "val"
+    combined = pd.concat([train, val], ignore_index=True)
+    combined["game_date"] = pd.to_datetime(combined["game_date"])
+    combined = compute_rolling_features(combined)
+    train = combined[combined["_split"] == "train"].copy()
+    val = combined[combined["_split"] == "val"].copy()
     return train, val
 
 def get_X_y(df, feats):
@@ -60,12 +104,10 @@ def build_model(config):
 
     elif mtype == "xgboost":
         from xgboost import XGBClassifier
-        return XGBClassifier(
-            n_estimators=config.get("n_estimators", 200),
-            max_depth=config.get("max_depth", 4),
-            learning_rate=config.get("learning_rate", 0.05),
-            random_state=seed,
-        )
+        params = {k: v for k, v in config.items() if k != "type"}
+        params.setdefault("random_state", seed)
+        params.setdefault("eval_metric", "logloss")
+        return XGBClassifier(**params)
 
     elif mtype == "random_forest":
         from sklearn.ensemble import RandomForestClassifier

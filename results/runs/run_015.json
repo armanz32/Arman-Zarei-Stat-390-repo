@@ -1,0 +1,15 @@
+{
+  "run_id": 15,
+  "val_loss": 0.665846,
+  "cv_mean": 0.697022,
+  "cv_std": 0.009262,
+  "features": [
+    "elo_diff",
+    "home_game",
+    "rest_diff"
+  ],
+  "config": {
+    "type": "xgboost"
+  },
+  "runtime_s": 0.79
+}

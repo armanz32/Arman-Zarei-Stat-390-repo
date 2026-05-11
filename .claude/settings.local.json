@@ -8,7 +8,9 @@
       "Bash(python train.py)",
       "Bash(python -c \"import pandas as pd; df = pd.read_csv\\('data/processed/train.csv'\\); print\\(list\\(df.columns\\)\\)\")",
       "Bash(python prepare.py)",
-      "Bash(python -c \"import pandas as pd; df = pd.read_csv\\('data/processed/train.csv'\\); print\\([c for c in df.columns if 'win_pct' in c or 'score_avg' in c]\\)\")"
+      "Bash(python -c \"import pandas as pd; df = pd.read_csv\\('data/processed/train.csv'\\); print\\([c for c in df.columns if 'win_pct' in c or 'score_avg' in c]\\)\")",
+      "Bash(python -c \"import pandas as pd; df=pd.read_csv\\('data/processed/train.csv'\\); print\\(list\\(df.columns\\)\\)\")",
+      "Bash(python -c \"import pandas as pd; df = pd.read_csv\\('data/processed/train.csv'\\); print\\(df[['home_team','away_team','home_score','away_score','home_win','game_date','home_rest_days','away_rest_days']].head\\(5\\)\\)\")"
     ]
   }
 }

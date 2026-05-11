@@ -1,0 +1,29 @@
+{
+  "run_id": 61,
+  "val_loss": 0.621538,
+  "cv_mean": 0.634852,
+  "cv_std": 0.00769,
+  "features": [
+    "elo_diff",
+    "home_game",
+    "rest_diff",
+    "home_pts_scored_4",
+    "home_pts_scored_8",
+    "home_pts_allowed_4",
+    "home_pts_allowed_8",
+    "away_pts_scored_4",
+    "away_pts_scored_8",
+    "away_pts_allowed_4",
+    "away_pts_allowed_8",
+    "home_win_pct_4",
+    "home_win_pct_8",
+    "away_win_pct_4",
+    "away_win_pct_8"
+  ],
+  "config": {
+    "type": "xgboost",
+    "max_depth": 2,
+    "learning_rate": 0.05
+  },
+  "runtime_s": 2.17
+}
