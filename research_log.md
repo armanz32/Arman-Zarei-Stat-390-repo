@@ -44,3 +44,6 @@ Observations:
 - Rolling features as a baseline feature didn't work, but removing rest_days as a baseline feature slightly improved log loss
 
 Goal for Next Week: Get a success and improve the general process
+
+Week 5
+

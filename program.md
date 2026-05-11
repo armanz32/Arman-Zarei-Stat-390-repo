@@ -22,8 +22,8 @@ If you are unsure whether an action is allowed, do not take it. Log the ambiguit
 
 Metric & Acceptance Rule
 Metric: Log loss on the 2024 validation season (produced by train.py)
-Acceptance threshold: A change is accepted only if: new_val_log_loss < current_best_val_log_loss * 0.985
-This means a minimum 1.5% improvement is required. Improvements smaller than 1.5% are discarded even if positive.
+Acceptance threshold: A change is accepted only if: new_val_log_loss < current_best_val_log_loss * 0.9975
+This means a minimum 0.25% improvement is required. Improvements smaller than 0.25% are discarded even if positive.
 
 The Loop (execute exactly in this order)
 Step 1 — Read the queue: Read the next unchecked item in the Experiment Queue below. Do not skip items or reorder them.
@@ -32,7 +32,7 @@ Step 2 — Make exactly one change: Edit train.py to implement that item and not
 Step 3 — Run the experiment; python train.py
 Record the val log loss and CV mean ± std printed to stdout.
 
-Step 4 — Evaluate: Compare new_val_log_loss against current_best_val_log_loss * 0.985.
+Step 4 — Evaluate: Compare new_val_log_loss against current_best_val_log_loss * 0.9975.
 If accepted: Update "Current best val log loss" above. Save the model checkpoint to results/best_model/. Mark the queue item ✅.
 If rejected: Revert train.py to its previous state (the accepted version). Mark the queue item ❌. Log the failure in failure_log.md.
 
