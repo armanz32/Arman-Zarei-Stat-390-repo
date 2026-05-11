@@ -59,6 +59,30 @@ Experiemnt Queue
 ❌ 009: Add elo_diff² (squared ELO diff)
 ❌ 010: Drop rest_diff entirely
 
+Week 5 Experiment Block:
+Goal: Explore XGBoost as a replacement model and tune hyperparameters
+Threshold: 0.25% better than the baseline
+011: Swap model to XGBoost, all default params, keep current feature set
+012: Set max_depth = 2
+013: Set max_depth = 4
+014: Set max_depth = 6
+015: Set n_estimators = 100
+016: Set n_estimators = 300
+017: Set n_estimators = 500
+018: Set learning_rate = 0.01
+019: Set learning_rate = 0.05
+020: Set learning_rate = 0.3
+021: Set subsample = 0.6
+022: Set subsample = 0.8
+023: Set colsample_bytree = 0.6
+024: Set colsample_bytree = 0.8
+025: Set min_child_weight = 2
+026: Set min_child_weight = 5
+027: Set reg_lambda = 1
+028: Set reg_lambda = 5
+029: Set reg_alpha = 0.1
+030: Set reg_alpha = 1.0
+
 Iteration Log
 Append one entry per run. Do not edit previous entries.
 
