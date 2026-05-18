@@ -31,10 +31,20 @@ rolling_features_011b = [
 ]
 features = baseline_features + rolling_features_011b
 
+lr_features_002 = [
+    "elo_diff", "home_game", "rest_diff",
+    "home_pts_scored_4", "home_pts_scored_8", "home_pts_scored_16",
+    "away_pts_scored_4", "away_pts_scored_8", "away_pts_scored_16",
+    "home_win_pct_4", "home_win_pct_8", "home_win_pct_16",
+    "away_win_pct_4", "away_win_pct_8", "away_win_pct_16",
+]
+
 model_config = {
-    "type": "xgboost",
-    "max_depth": 2,
-    "learning_rate": 0.05,
+    "type": "ensemble",
+    "xgb_config": {"type": "xgboost", "max_depth": 2, "learning_rate": 0.05},
+    "lr_config": {"type": "logistic_regression"},
+    "xgb_weight": 0.0,
+    "lr_weight": 1.0,
 }
 cv = 5
 
@@ -104,15 +114,24 @@ def build_model(config):
 
     elif mtype == "xgboost":
         from xgboost import XGBClassifier
-        params = {k: v for k, v in config.items() if k != "type"}
+        exclude = {"type", "top_n_features"}
+        params = {k: v for k, v in config.items() if k not in exclude}
         params.setdefault("random_state", seed)
         params.setdefault("eval_metric", "logloss")
         return XGBClassifier(**params)
+
+    elif mtype == "lightgbm":
+        from lightgbm import LGBMClassifier
+        params = {k: v for k, v in config.items() if k != "type"}
+        params.setdefault("random_state", seed)
+        params.setdefault("verbose", -1)
+        return LGBMClassifier(**params)
 
     elif mtype == "random_forest":
         from sklearn.ensemble import RandomForestClassifier
         return RandomForestClassifier(
             n_estimators=config.get("n_estimators", 200),
+            max_depth=config.get("max_depth", None),
             random_state=seed,
         )
     #safety
@@ -182,13 +201,128 @@ if __name__ == "__main__":
 
     t0 = time.time()
     train, val = load_data()
-    X_train, y_train = get_X_y(train, features)
-    X_val, y_val = get_X_y(val, features)
 
-    model, cv_mean, cv_std = train_model(X_train, y_train, model_config)
-    val_loss = log_loss(y_val, model.predict_proba(X_val)[:, 1])
+    if model_config["type"] == "ensemble_weight_search":
+        xgb_cfg = model_config["xgb_config"]
+        lr_cfg = model_config["lr_config"]
+        weight_grid = model_config["weight_grid"]
+
+        X_train_xgb, y_train_xgb = get_X_y(train, features)
+        X_val_xgb, _ = get_X_y(val, features)
+        X_train_lr, y_train_lr = get_X_y(train, lr_features_002)
+        X_val_lr, y_val = get_X_y(val, lr_features_002)
+
+        xgb_model = build_model(xgb_cfg)
+        xgb_model.fit(X_train_xgb, y_train_xgb)
+        lr_model = build_model(lr_cfg)
+        lr_model.fit(X_train_lr, y_train_lr)
+        p_xgb_val = xgb_model.predict_proba(X_val_xgb)[:, 1]
+        p_lr_val  = lr_model.predict_proba(X_val_lr)[:, 1]
+
+        print("\nWeight grid search results:")
+        best_loss, best_w_xgb, best_w_lr = float("inf"), None, None
+        for w_xgb, w_lr in weight_grid:
+            loss = log_loss(y_val, w_xgb * p_xgb_val + w_lr * p_lr_val)
+            print(f"  XGB={w_xgb}, LR={w_lr} -> val_loss={loss:.6f}")
+            if loss < best_loss:
+                best_loss, best_w_xgb, best_w_lr = loss, w_xgb, w_lr
+        print(f"\nBest weights: XGB={best_w_xgb}, LR={best_w_lr} -> val_loss={best_loss:.6f}")
+
+        kf = StratifiedKFold(n_splits=cv, shuffle=True, random_state=seed)
+        cv_losses = []
+        for ti, vi in kf.split(X_train_xgb, y_train_xgb):
+            m_xgb = build_model(xgb_cfg)
+            m_xgb.fit(X_train_xgb[ti], y_train_xgb[ti])
+            m_lr = build_model(lr_cfg)
+            m_lr.fit(X_train_lr[ti], y_train_lr[ti])
+            p = best_w_xgb * m_xgb.predict_proba(X_train_xgb[vi])[:, 1] + best_w_lr * m_lr.predict_proba(X_train_lr[vi])[:, 1]
+            cv_losses.append(log_loss(y_train_xgb[vi], p))
+        cv_mean = np.mean(cv_losses)
+        cv_std  = np.std(cv_losses)
+
+        val_loss = best_loss
+        model = (xgb_model, lr_model)
+        model_config = dict(model_config, best_xgb_weight=best_w_xgb, best_lr_weight=best_w_lr)
+        active_features = features
+
+    elif model_config["type"] == "ensemble":
+        xgb_cfg = model_config["xgb_config"]
+        lr_cfg = model_config["lr_config"]
+        rf_cfg = model_config.get("rf_config")
+        lgbm_cfg = model_config.get("lgbm_config")
+        w_xgb = model_config["xgb_weight"]
+        w_lr = model_config["lr_weight"]
+        w_rf = model_config.get("rf_weight", 0)
+        w_lgbm = model_config.get("lgbm_weight", 0)
+
+        X_train_xgb, y_train_xgb = get_X_y(train, features)
+        X_val_xgb, _ = get_X_y(val, features)
+        X_train_lr, y_train_lr = get_X_y(train, lr_features_002)
+        X_val_lr, y_val = get_X_y(val, lr_features_002)
+
+        kf = StratifiedKFold(n_splits=cv, shuffle=True, random_state=seed)
+        cv_losses = []
+        for ti, vi in kf.split(X_train_xgb, y_train_xgb):
+            m_xgb = build_model(xgb_cfg)
+            m_xgb.fit(X_train_xgb[ti], y_train_xgb[ti])
+            m_lr = build_model(lr_cfg)
+            m_lr.fit(X_train_lr[ti], y_train_lr[ti])
+            p = w_xgb * m_xgb.predict_proba(X_train_xgb[vi])[:, 1] + w_lr * m_lr.predict_proba(X_train_lr[vi])[:, 1]
+            if rf_cfg:
+                m_rf = build_model(rf_cfg)
+                m_rf.fit(X_train_xgb[ti], y_train_xgb[ti])
+                p += w_rf * m_rf.predict_proba(X_train_xgb[vi])[:, 1]
+            if lgbm_cfg:
+                m_lgbm = build_model(lgbm_cfg)
+                m_lgbm.fit(X_train_xgb[ti], y_train_xgb[ti])
+                p += w_lgbm * m_lgbm.predict_proba(X_train_xgb[vi])[:, 1]
+            cv_losses.append(log_loss(y_train_xgb[vi], p))
+        cv_mean = np.mean(cv_losses)
+        cv_std = np.std(cv_losses)
+
+        xgb_model = build_model(xgb_cfg)
+        xgb_model.fit(X_train_xgb, y_train_xgb)
+        lr_model = build_model(lr_cfg)
+        lr_model.fit(X_train_lr, y_train_lr)
+        val_preds = w_xgb * xgb_model.predict_proba(X_val_xgb)[:, 1] + w_lr * lr_model.predict_proba(X_val_lr)[:, 1]
+        if rf_cfg:
+            rf_model = build_model(rf_cfg)
+            rf_model.fit(X_train_xgb, y_train_xgb)
+            val_preds += w_rf * rf_model.predict_proba(X_val_xgb)[:, 1]
+        if lgbm_cfg:
+            lgbm_model = build_model(lgbm_cfg)
+            lgbm_model.fit(X_train_xgb, y_train_xgb)
+            val_preds += w_lgbm * lgbm_model.predict_proba(X_val_xgb)[:, 1]
+        val_loss = log_loss(y_val, val_preds)
+        model = (xgb_model, lr_model)
+        active_features = features
+    else:
+        X_train, y_train = get_X_y(train, features)
+        X_val, y_val = get_X_y(val, features)
+
+        top_n = model_config.get("top_n_features")
+        if top_n:
+            probe_cfg = {k: v for k, v in model_config.items() if k != "top_n_features"}
+            probe = build_model(probe_cfg)
+            probe.fit(X_train, y_train)
+            importance_pairs = sorted(zip(features, probe.feature_importances_), key=lambda x: x[1], reverse=True)
+            print("\nFeature importances (descending):")
+            for fname, fimp in importance_pairs:
+                print(f"  {fname}: {fimp:.6f}")
+            selected = [f for f, _ in importance_pairs[:top_n]]
+            print(f"\nTop {top_n} selected: {selected}\n")
+            X_train = X_train[:, [features.index(f) for f in selected]]
+            X_val   = X_val[:,   [features.index(f) for f in selected]]
+            active_features = selected
+        else:
+            active_features = features
+
+        model, cv_mean, cv_std = train_model(X_train, y_train, model_config)
+        val_loss = log_loss(y_val, model.predict_proba(X_val)[:, 1])
+
     runtime = time.time() - t0
 
-    log_result(run_id, val_loss, cv_mean, cv_std, features, model_config, runtime)
+    log_features = active_features if model_config["type"] != "ensemble" else features
+    log_result(run_id, val_loss, cv_mean, cv_std, log_features, model_config, runtime)
     save_best(model, val_loss, run_id)
     print(f"\nVal log loss: {val_loss:.6f} | CV: {cv_mean:.6f} ± {cv_std:.6f} | Time: {runtime:.1f}s")

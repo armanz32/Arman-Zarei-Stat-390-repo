@@ -1,0 +1,51 @@
+{
+  "run_id": 78,
+  "val_loss": 0.619347,
+  "cv_mean": 0.633012,
+  "cv_std": 0.007718,
+  "features": [
+    "elo_diff",
+    "home_game",
+    "rest_diff",
+    "home_pts_scored_4",
+    "home_pts_scored_8",
+    "home_pts_scored_16",
+    "home_pts_allowed_4",
+    "home_pts_allowed_8",
+    "home_pts_allowed_16",
+    "away_pts_scored_4",
+    "away_pts_scored_8",
+    "away_pts_scored_16",
+    "away_pts_allowed_4",
+    "away_pts_allowed_8",
+    "away_pts_allowed_16",
+    "home_win_pct_4",
+    "home_win_pct_8",
+    "home_win_pct_16",
+    "away_win_pct_4",
+    "away_win_pct_8",
+    "away_win_pct_16",
+    "home_rest_days",
+    "away_rest_days"
+  ],
+  "config": {
+    "type": "ensemble",
+    "xgb_config": {
+      "type": "xgboost",
+      "max_depth": 2,
+      "learning_rate": 0.05
+    },
+    "lr_config": {
+      "type": "logistic_regression"
+    },
+    "rf_config": {
+      "type": "random_forest",
+      "n_estimators": 300,
+      "max_depth": 6
+    },
+    "xgb_weight": 0.3333333333333333,
+    "lr_weight": 0.3333333333333333,
+    "rf_weight": 0.3333333333333333
+  },
+  "runtime_s": 8.73
+}

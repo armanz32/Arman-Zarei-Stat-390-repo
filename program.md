@@ -114,6 +114,25 @@ Threshold: 0.25% better than the baseline
 059: Remove window-16 features + remove pts_allowed features + set min_child_weight=4 + set colsample_bytree=0.6
 060: Remove window-16 features + remove pts_allowed features + set min_child_weight=4 + remove rest_days features
 
+Week 6 Experiment Block:
+❌ 061: Add early_stopping_rounds=10, n_estimators=500, eval_set=[(X_val, y_val)] to Run 019 config (max_depth=2, lr=0.05)
+❌ 062: Same as 061 but set learning_rate=0.03
+❌ 063: Add 32-game rolling win% (home + away) to Run 019 config (23+2 features)
+❌ 064: Add 32-game rolling pts scored/allowed (home + away) to Run 019 config (23+4 features)
+❌ 065: Add all 32-game rolling features (win%, pts scored, pts allowed — home + away) to Run 019 config (27 features)
+✅ 066: Ensemble — average predictions of Run 019 (XGBoost) and Run 002 (Logistic Regression) with equal weights (0.5/0.5)
+❌ 067: Ensemble — average predictions of Run 019 (XGBoost) and Run 002 (Logistic Regression) with weights (0.35 XGB / 0.65 LR)
+❌ 068: Swap model to LightGBM, same 23 features, equivalent config (max_depth=2, learning_rate=0.05, n_estimators=100)
+❌ 069: Swap model to Random Forest, same 23 features (n_estimators=300, max_depth=6)
+❌ 070: Take best result from runs 061-069 and add colsample_bytree=0.6 on top of it
+❌ 071: Use XGBoost Run 019 config, keep only top 10 features by feature_importances_ (log importances first, then retrain)
+❌ 072: Use XGBoost Run 019 config, keep only top 15 features by feature_importances_
+❌ 073: Ensemble Run 019 (XGBoost) + Run 002 (LR) + Run 069 (Random Forest), equal weights (0.33 each)
+❌ 074: Ensemble Run 019 (XGBoost) + Run 002 (LR) + LightGBM (Run 068 result), equal weights
+❌ 075: Grid search ensemble weights for run 066 (try 0.4/0.6, 0.3/0.7, 0.6/0.4) and take best
+❌ 076: Ensemble Run 019 (XGBoost) + Run 002 (LR) with weights 0.2 XGB / 0.8 LR
+✅ 077: Ensemble Run 019 (XGBoost) + Run 002 (LR) with weights 0.0 XGB / 1.0 LR (pure LR)
+
 Iteration Log
 Append one entry per run. Do not edit previous entries.
 
@@ -614,3 +633,139 @@ Val log loss: [0.622918]
 CV mean ± std: [0.637302] ± [0.007721]
 Accepted: No
 Notes: Regression vs Run 019 (+0.015%: 0.622824 → 0.622918). The most aggressive combination is the worst — adding more changes beyond the optimal two-way set (Run 052) consistently degrades. Week 7 combination block complete; best result: Run 052 (0.621487, -0.215%). train.py reverted to Run 019 state.
+
+Run 061 — XGBoost early stopping (n_estimators=500, early_stopping_rounds=10)
+Date: [5/18/2026]
+Change: Added n_estimators=500 and early_stopping_rounds=10 to Run 019 config (max_depth=2, lr=0.05). eval_set=[(X_val, y_val)] used for final fit; CV folds use val fold as eval_set. 23 features unchanged.
+Val log loss: [0.622517]
+CV mean ± std: [0.635222] ± [0.007607]
+Accepted: No
+Notes: Improvement of 0.049% (0.622824 → 0.622517) — below the 0.25% threshold (0.621268). Early stopping with n_estimators=500 provides marginal benefit; the model likely stops well before 500 trees but the optimal tree count at lr=0.05 is already close to the default 100. train.py reverted to Run 019 state. best_meta.json restored to run_24 (0.622824).
+
+Run 062 — XGBoost early stopping lr=0.03 (n_estimators=500, early_stopping_rounds=10)
+Date: [5/18/2026]
+Change: Same as 061 but learning_rate=0.03. n_estimators=500, early_stopping_rounds=10, max_depth=2. eval_set=[(X_val, y_val)] for final fit. 23 features unchanged.
+Val log loss: [0.622536]
+CV mean ± std: [0.635206] ± [0.007766]
+Accepted: No
+Notes: Improvement of 0.046% (0.622824 → 0.622536) — below the 0.25% threshold (0.621268). Nearly identical to Run 061 (lr=0.05 with early stopping). Early stopping does not meaningfully help at either lr=0.05 or lr=0.03 with 500 trees. train.py reverted to Run 019 state. best_meta.json restored to run_24 (0.622824).
+
+Run 063 — Add 32-game rolling win% (25 features)
+Date: [5/18/2026]
+Change: Added home_win_pct_32 and away_win_pct_32 to Run 019 config. windows expanded to [4,8,16,32] in compute_rolling_features. 23 → 25 features.
+Val log loss: [0.621702]
+CV mean ± std: [0.635599] ± [0.007759]
+Accepted: No
+Notes: Improvement of 0.180% (0.622824 → 0.621702) — below the 0.25% threshold (0.621268). Adding 32-game win% is a near-miss; longer-window signal helps slightly but not enough to clear the bar. train.py reverted to Run 019 state (windows=[4,8,16], 23 features). best_meta.json restored to run_24 (0.622824).
+
+Run 064 — Add 32-game rolling pts scored/allowed (27 features)
+Date: [5/18/2026]
+Change: Added home/away_pts_scored_32 and home/away_pts_allowed_32 to Run 019 config. windows expanded to [4,8,16,32]. 23 → 27 features.
+Val log loss: [0.625513]
+CV mean ± std: [0.635555] ± [0.007883]
+Accepted: No
+Notes: Regression — 0.625513 > 0.622824 (+0.43%). 32-game scoring features add noise; contrast with Run 063 (32-game win% slightly helped). Long-window scoring is less informative than long-window win%. train.py reverted to Run 019 state (windows=[4,8,16], 23 features).
+
+Run 065 — Add all 32-game rolling features (29 features)
+Date: [5/18/2026]
+Change: Added home/away_win_pct_32, pts_scored_32, pts_allowed_32 to Run 019 config. windows=[4,8,16,32]. 23 → 29 features (spec listed 27; actual count is 29 — 6 new features).
+Val log loss: [0.625513]
+CV mean ± std: [0.635648] ± [0.007995]
+Accepted: No
+Notes: Regression — identical to Run 064 (0.625513). Adding 32-game win% on top of 32-game scoring features has zero marginal effect. 32-game scoring features dominate negatively regardless of win% inclusion. train.py reverted to Run 019 state (windows=[4,8,16], 23 features).
+
+Run 066 — Ensemble XGBoost (Run 019) + LR (Run 002), weights 0.5/0.5
+Date: [5/18/2026]
+Change: Ensemble of Run 019 XGBoost (max_depth=2, lr=0.05, 23 features) and Run 002 LR (Groups A+B+C, 15 features) with equal weights. Predictions averaged: 0.5 × XGB + 0.5 × LR. CV computed on ensemble predictions per fold.
+Val log loss: [0.618727]
+CV mean ± std: [0.633352] ± [0.008020]
+Accepted: Yes
+Notes: First acceptance in Week 6 block. Improvement of 0.658% (0.622824 → 0.618727) — exceeds 0.25% threshold (0.621268). Ensemble diversity between XGB and LR provides genuine complementary signal. New best: 0.618727. Model checkpoint saved (run_71).
+
+Run 067 — Ensemble XGBoost (Run 019) + LR (Run 002), weights 0.35/0.65
+Date: [5/18/2026]
+Change: Same ensemble as Run 066 but shifted weight toward LR: 0.35 × XGB + 0.65 × LR.
+Val log loss: [0.617921]
+CV mean ± std: [0.633362] ± [0.008195]
+Accepted: No
+Notes: Improvement of 0.130% (0.618727 → 0.617921) — below the 0.25% threshold (0.617180). LR-heavy weighting is marginally better than equal weights but not enough to clear the bar. train.py reverted to Run 066 state (weights 0.5/0.5). best_meta.json restored to run_71 (0.618727).
+
+Run 068 — LightGBM (max_depth=2, lr=0.05, n_estimators=100)
+Date: [5/18/2026]
+Change: Swapped model to LightGBM with equivalent config to Run 019 (max_depth=2, learning_rate=0.05, n_estimators=100). Same 23 features.
+Val log loss: [0.622597]
+CV mean ± std: [0.635452] ± [0.007721]
+Accepted: No
+Notes: Regression vs current best Run 066 (+0.62%: 0.618727 → 0.622597). LightGBM with equivalent config does not match the XGBoost+LR ensemble. Notably, LightGBM is slightly better than XGBoost alone (Run 019: 0.622824) but far below the ensemble. train.py reverted to Run 066 ensemble state.
+
+Run 069 — Random Forest (n_estimators=300, max_depth=6)
+Date: [5/18/2026]
+Change: Swapped model to Random Forest (n_estimators=300, max_depth=6). Same 23 features as Run 019.
+Val log loss: [0.621606]
+CV mean ± std: [0.633781] ± [0.007147]
+Accepted: No
+Notes: Regression vs current best Run 066 (+0.46%: 0.618727 → 0.621606). Random Forest does not match the XGBoost+LR ensemble. CV std (0.007) is the lowest in the block, indicating stability, but absolute performance falls short. train.py reverted to Run 066 ensemble state.
+
+Run 070 — Ensemble XGB (cbt=0.6) + LR, weights 0.5/0.5 (on top of Run 066)
+Date: [5/18/2026]
+Change: Added colsample_bytree=0.6 to the XGBoost component of the accepted Run 066 ensemble. Best run from 061-069 was Run 066 (0.618727); this adds cbt=0.6 on top.
+Val log loss: [0.618306]
+CV mean ± std: [0.633391] ± [0.008126]
+Accepted: No
+Notes: Improvement of 0.068% (0.618727 → 0.618306) — below the 0.25% threshold (0.617180). colsample_bytree=0.6 in the ensemble context provides marginal benefit, consistent with its pattern in solo XGBoost runs (Run 023: -0.15%). Week 6 block complete. Final accepted state: Run 066 ensemble (XGB + LR, 0.5/0.5, val_loss=0.618727). train.py reverted to Run 066 ensemble state. best_meta.json restored to run_71 (0.618727).
+
+Run 071 — XGBoost Run 019 config, top 10 features by feature_importances_
+Date: [5/18/2026]
+Change: Train probe XGBoost (max_depth=2, lr=0.05) on all 23 features, log importances, select top 10, retrain on those 10. Top 10: elo_diff, home_win_pct_8/4/16, away_pts_scored_16/8/4, home_pts_scored_8/16, away_win_pct_8. Note: home_game and home_rest_days had zero importance.
+Val log loss: [0.625539]
+CV mean ± std: [0.637595] ± [0.009236]
+Accepted: No
+Notes: Regression vs current best (+1.10%: 0.618727 → 0.625539). Pruning to top 10 features drops too much signal — notably home_game (zero importance probe artifact) is important for calibration. train.py reverted to Run 066 ensemble state.
+
+Run 072 — XGBoost Run 019 config, top 15 features by feature_importances_
+Date: [5/18/2026]
+Change: Train probe XGBoost (max_depth=2, lr=0.05) on all 23 features, select top 15 by importances, retrain on those 15. Top 15 adds: home_pts_allowed_16/4, home_pts_scored_4, away_pts_allowed_4, away_win_pct_16 beyond the top 10.
+Val log loss: [0.623045]
+CV mean ± std: [0.634800] ± [0.007600]
+Accepted: No
+Notes: Regression vs current best (+0.69%: 0.618727 → 0.623045). Better than top 10 (0.625539) but still regresses vs both Run 066 (0.618727) and Run 019 (0.622824). Importance-based pruning consistently hurts — the 8 pruned features contribute net positive signal even at low importances. train.py reverted to Run 066 ensemble state.
+
+Run 073 — 3-model Ensemble XGBoost + LR + Random Forest, equal weights
+Date: [5/18/2026]
+Change: 3-model ensemble: XGBoost (Run 019, max_depth=2, lr=0.05, 23 features) + LR (Run 002, 15 features) + Random Forest (n_estimators=300, max_depth=6, 23 features). Weights: 1/3 each.
+Val log loss: [0.619347]
+CV mean ± std: [0.633012] ± [0.007718]
+Accepted: No
+Notes: Regression vs current best (+0.10%: 0.618727 → 0.619347). Adding RF to the XGB+LR ensemble slightly hurts — RF alone (Run 069: 0.621606) is weaker than XGB alone and dilutes the superior XGB+LR signal. train.py reverted to Run 066 ensemble state.
+
+Run 074 — 3-model Ensemble XGBoost + LR + LightGBM, equal weights
+Date: [5/18/2026]
+Change: 3-model ensemble: XGBoost (Run 019, max_depth=2, lr=0.05, 23 features) + LR (Run 002, 15 features) + LightGBM (max_depth=2, lr=0.05, n_estimators=100, 23 features). Weights: 1/3 each.
+Val log loss: [0.619805]
+CV mean ± std: [0.633645] ± [0.007907]
+Accepted: No
+Notes: Regression vs current best (+0.17%: 0.618727 → 0.619805). Adding LightGBM also hurts — LightGBM alone (Run 068: 0.622597) is weaker than XGB, diluting the XGB+LR ensemble more than RF did. 2-model XGB+LR (Run 066) remains the optimal combination. train.py reverted to Run 066 ensemble state.
+
+Run 075 — Weight grid search on Run 066 ensemble (XGB=0.3, LR=0.7 is best)
+Date: [5/18/2026]
+Change: Grid search over 3 weight combos for XGB+LR ensemble. Results: (0.4/0.6)=0.618168, (0.3/0.7)=0.617695, (0.6/0.4)=0.619373. Best: XGB=0.3, LR=0.7. CV computed with best weights.
+Val log loss: [0.617695]
+CV mean ± std: [0.633435] ± [0.008258]
+Accepted: No
+Notes: Improvement of 0.167% (0.618727 → 0.617695) — below the 0.25% threshold (0.617180). Missed by 0.000515. LR-heavy weighting consistently helps (Run 067: 0.35/0.65 was also better than equal weights) but none of the tested combos clear the bar. train.py reverted to Run 066 ensemble state. best_meta.json restored to run_71 (0.618727).
+
+Run 076 — Ensemble XGB + LR, weights 0.2/0.8
+Date: [5/18/2026]
+Change: Ensemble Run 019 (XGBoost, max_depth=2, lr=0.05, 23 features) + Run 002 (LR, 15 features) with weights 0.2 XGB / 0.8 LR.
+Val log loss: [0.617311]
+CV mean ± std: [0.633685] ± [0.008393]
+Accepted: No
+Notes: Improvement of 0.229% (0.618727 → 0.617311) — below the 0.25% threshold (0.617180). Missed by 0.000131. Narrowest near-miss of all 76 runs. LR-heavy trend continues: 0.5/0.5=0.618727, 0.35/0.65=0.617921, 0.3/0.7=0.617695, 0.2/0.8=0.617311 — still improving but not crossing the bar. train.py reverted to Run 066 ensemble state. best_meta.json restored to run_71 (0.618727).
+
+Run 077 — Pure LR (XGB weight=0.0, LR weight=1.0)
+Date: [5/18/2026]
+Change: Ensemble weights set to 0.0 XGB / 1.0 LR — effectively pure Logistic Regression on lr_features_002 (15 features: baseline + rolling pts scored 4/8/16 + rolling win pct 4/8/16).
+Val log loss: [0.616811]
+CV mean ± std: [0.634619] ± [0.008704]
+Accepted: Yes
+Notes: Improvement of 0.310% (0.618727 → 0.616811) — exceeds 0.25% threshold (0.617180). LR-heavy weight trend finally clears the bar at 0/1. Reveals that the LR on 15 features consistently outperforms any XGB contribution in this ensemble; pure LR beats all mixed weights. New best: 0.616811. Model checkpoint saved (run_82).

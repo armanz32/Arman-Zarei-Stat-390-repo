@@ -18,6 +18,8 @@ for r in runs:
 plt.figure(figsize=(14, 5))
 plt.plot(ids, losses, marker="o")
 plt.xticks(rotation=45, ha="right")
+plt.axhline(0.623589, linestyle="--", color="red", label="Logistic Regression Baseline")
+plt.axhline(0.622824, linestyle="--", color="green", label="Best (Run 019)")
 plt.xlabel("Run")
 plt.ylabel("Val Log Loss")
 plt.title("Week 5 Experiment Block — Val Log Loss (Runs 016–063)")

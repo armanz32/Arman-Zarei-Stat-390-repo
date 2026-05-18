@@ -10,7 +10,10 @@
       "Bash(python prepare.py)",
       "Bash(python -c \"import pandas as pd; df = pd.read_csv\\('data/processed/train.csv'\\); print\\([c for c in df.columns if 'win_pct' in c or 'score_avg' in c]\\)\")",
       "Bash(python -c \"import pandas as pd; df=pd.read_csv\\('data/processed/train.csv'\\); print\\(list\\(df.columns\\)\\)\")",
-      "Bash(python -c \"import pandas as pd; df = pd.read_csv\\('data/processed/train.csv'\\); print\\(df[['home_team','away_team','home_score','away_score','home_win','game_date','home_rest_days','away_rest_days']].head\\(5\\)\\)\")"
+      "Bash(python -c \"import pandas as pd; df = pd.read_csv\\('data/processed/train.csv'\\); print\\(df[['home_team','away_team','home_score','away_score','home_win','game_date','home_rest_days','away_rest_days']].head\\(5\\)\\)\")",
+      "Bash(python -c \"import xgboost; print\\(xgboost.__version__\\)\")",
+      "Bash(python -c \"from xgboost import XGBClassifier; import inspect; print\\([p for p in inspect.signature\\(XGBClassifier.fit\\).parameters]\\)\")",
+      "Bash(pip install *)"
     ]
   }
 }

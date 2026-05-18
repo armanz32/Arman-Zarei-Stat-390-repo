@@ -4,7 +4,7 @@ Summary
 
 Val Log Loss (2024) 
 Baseline (ELO diff, home, rest): 0.702775
-Current best: 0.622824 (Run 019, XGBoost max_depth=2 lr=0.05) |== [Week 5 block complete]
+Current best: 0.616811 (Run 077, pure LR on 15 features — Groups A+B+C) |== [Week 6 block in progress]
 Best model type: XGBoost
 Best features: elo_diff, home_game, rest_diff + rolling pts scored/allowed 4/8/16 + rolling win% 4/8/16 + home_rest_days, away_rest_days (23 features)
 Best config: max_depth=2, learning_rate=0.05, n_estimators=100 (all other params default)
@@ -77,3 +77,20 @@ Experiment Table
 | 058 | XGBoost (max_depth=2, lr=0.05, cbt=0.6) | 17 features: no pts_allowed | 0.622866 | 0.637399 ± 0.008561 | +0.006% vs 019 | ❌ Rejected (regression) |
 | 059 | XGBoost (max_depth=2, lr=0.05, mcw=4, cbt=0.6) | 13 features: no window-16, no pts_allowed | 0.621703 | 0.636615 ± 0.008007 | -0.18% vs 019 | ❌ Rejected (<0.25% threshold) |
 | 060 | XGBoost (max_depth=2, lr=0.05, mcw=4) | 11 features: no window-16, no pts_allowed, no rest_days | 0.622918 | 0.637302 ± 0.007721 | +0.02% vs 019 | ❌ Rejected (regression) |
+| 061 | XGBoost (max_depth=2, lr=0.05, n_estimators=500, early_stopping_rounds=10) | 23 features (Run 019 feature set) | 0.622517 | 0.635222 ± 0.007607 | -0.05% vs 019 | ❌ Rejected (<0.25% threshold) |
+| 062 | XGBoost (max_depth=2, lr=0.03, n_estimators=500, early_stopping_rounds=10) | 23 features (Run 019 feature set) | 0.622536 | 0.635206 ± 0.007766 | -0.05% vs 019 | ❌ Rejected (<0.25% threshold) |
+| 063 | XGBoost (max_depth=2, lr=0.05) | 25 features: Run 019 + home/away_win_pct_32 | 0.621702 | 0.635599 ± 0.007759 | -0.18% vs 019 | ❌ Rejected (<0.25% threshold) |
+| 064 | XGBoost (max_depth=2, lr=0.05) | 27 features: Run 019 + home/away_pts_scored_32 + home/away_pts_allowed_32 | 0.625513 | 0.635555 ± 0.007883 | +0.43% vs 019 | ❌ Rejected (regression) |
+| 065 | XGBoost (max_depth=2, lr=0.05) | 29 features: Run 019 + all 32-game rolling (win%, pts scored, pts allowed) | 0.625513 | 0.635648 ± 0.007995 | +0.43% vs 019 | ❌ Rejected (regression; identical to Run 064) |
+| 066 | Ensemble XGBoost(019)+LR(002) w=0.5/0.5 | XGB: 23 features; LR: 15 features (Groups A+B+C) | 0.618727 | 0.633352 ± 0.008020 | -0.66% vs 019 | ✅ Accepted (new best: 0.618727) |
+| 067 | Ensemble XGBoost(019)+LR(002) w=0.35/0.65 | XGB: 23 features; LR: 15 features (Groups A+B+C) | 0.617921 | 0.633362 ± 0.008195 | -0.13% vs 066 | ❌ Rejected (<0.25% threshold) |
+| 068 | LightGBM (max_depth=2, lr=0.05, n_estimators=100) | 23 features (Run 019 feature set) | 0.622597 | 0.635452 ± 0.007721 | +0.62% vs 066 | ❌ Rejected (regression) |
+| 069 | Random Forest (n_estimators=300, max_depth=6) | 23 features (Run 019 feature set) | 0.621606 | 0.633781 ± 0.007147 | +0.46% vs 066 | ❌ Rejected (regression) |
+| 070 | Ensemble XGB(cbt=0.6)+LR w=0.5/0.5 | XGB: 23 features (cbt=0.6); LR: 15 features | 0.618306 | 0.633391 ± 0.008126 | -0.07% vs 066 | ❌ Rejected (<0.25% threshold) |
+| 071 | XGBoost (max_depth=2, lr=0.05) | Top 10 features by feature_importances_ | 0.625539 | 0.637595 ± 0.009236 | +1.10% vs 066 | ❌ Rejected (regression) |
+| 072 | XGBoost (max_depth=2, lr=0.05) | Top 15 features by feature_importances_ | 0.623045 | 0.634800 ± 0.007600 | +0.69% vs 066 | ❌ Rejected (regression) |
+| 073 | Ensemble XGB+LR+RF w=0.33 each | XGB: 23 feat; LR: 15 feat; RF: 23 feat | 0.619347 | 0.633012 ± 0.007718 | +0.10% vs 066 | ❌ Rejected (regression) |
+| 074 | Ensemble XGB+LR+LightGBM w=0.33 each | XGB: 23 feat; LR: 15 feat; LightGBM: 23 feat | 0.619805 | 0.633645 ± 0.007907 | +0.17% vs 066 | ❌ Rejected (regression) |
+| 075 | Ensemble XGB+LR weight grid search (best: 0.3/0.7) | XGB: 23 feat; LR: 15 feat | 0.617695 | 0.633435 ± 0.008258 | -0.17% vs 066 | ❌ Rejected (<0.25% threshold; missed by 0.000515) |
+| 076 | Ensemble XGB+LR w=0.2/0.8 | XGB: 23 feat; LR: 15 feat | 0.617311 | 0.633685 ± 0.008393 | -0.23% vs 066 | ❌ Rejected (<0.25% threshold; missed by 0.000131) |
+| 077 | Ensemble XGB+LR w=0.0/1.0 (pure LR) | LR: 15 features (Groups A+B+C) | 0.616811 | 0.634619 ± 0.008704 | -0.31% vs 066 | ✅ Accepted (new best: 0.616811) |

@@ -1,0 +1,30 @@
+{
+  "run_id": 77,
+  "val_loss": 0.623045,
+  "cv_mean": 0.6348,
+  "cv_std": 0.0076,
+  "features": [
+    "elo_diff",
+    "home_win_pct_8",
+    "home_win_pct_4",
+    "home_win_pct_16",
+    "away_pts_scored_16",
+    "away_pts_scored_8",
+    "home_pts_scored_8",
+    "away_win_pct_8",
+    "away_pts_scored_4",
+    "home_pts_scored_16",
+    "home_pts_allowed_16",
+    "home_pts_allowed_4",
+    "home_pts_scored_4",
+    "away_pts_allowed_4",
+    "away_win_pct_16"
+  ],
+  "config": {
+    "type": "xgboost",
+    "max_depth": 2,
+    "learning_rate": 0.05,
+    "top_n_features": 15
+  },
+  "runtime_s": 0.65
+}

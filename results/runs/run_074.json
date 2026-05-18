@@ -1,0 +1,37 @@
+{
+  "run_id": 74,
+  "val_loss": 0.621606,
+  "cv_mean": 0.633781,
+  "cv_std": 0.007147,
+  "features": [
+    "elo_diff",
+    "home_game",
+    "rest_diff",
+    "home_pts_scored_4",
+    "home_pts_scored_8",
+    "home_pts_scored_16",
+    "home_pts_allowed_4",
+    "home_pts_allowed_8",
+    "home_pts_allowed_16",
+    "away_pts_scored_4",
+    "away_pts_scored_8",
+    "away_pts_scored_16",
+    "away_pts_allowed_4",
+    "away_pts_allowed_8",
+    "away_pts_allowed_16",
+    "home_win_pct_4",
+    "home_win_pct_8",
+    "home_win_pct_16",
+    "away_win_pct_4",
+    "away_win_pct_8",
+    "away_win_pct_16",
+    "home_rest_days",
+    "away_rest_days"
+  ],
+  "config": {
+    "type": "random_forest",
+    "n_estimators": 300,
+    "max_depth": 6
+  },
+  "runtime_s": 8.45
+}
