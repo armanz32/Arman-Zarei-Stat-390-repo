@@ -59,3 +59,17 @@ Observations:
 - Removing the minimum acceptance threshold will improve the model for when I aim to get the best possible model
 
 Goal for Next Week: Continue improving the model
+
+Week 6
+
+Goal: Improve model and lock scope
+What I tried:
+- Continued changes of XGBoost hyperparameters
+- Limiting number of variables
+- Cereating an ensemble with XGBoost, LR, and other models
+
+What I found:
+- XGBoost mainly just adds noise due to the limited number of data
+- A purely Logistic Regression model has produced the best score
+
+Goal for Next Week: Finalize project and begin presentation slides
