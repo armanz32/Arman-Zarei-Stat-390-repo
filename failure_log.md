@@ -720,3 +720,132 @@
 **Threshold required:** 0.617180 (current_best × 0.9975)
 **Improvement:** 0.229% (0.618727 → 0.617311) — below the 0.25% minimum threshold. Missed by 0.000131. Narrowest near-miss of all runs.
 **Decision:** Rejected. train.py reverted to Run 066 ensemble state. best_meta.json restored to run_71 (0.618727).
+
+---
+
+### Run 078 — 2026-05-30
+**Change:** Pure LR (Run 077 feature set, 15 features — lr_features_002), set C=0.1 (stronger regularization vs default C=1.0).
+**Val log loss:** 0.616832
+**Current best:** 0.616811 (Run 077)
+**Threshold required:** 0.615269 (current_best × 0.9975)
+**Result:** Regression — 0.616832 > 0.616811 (+0.003%). Stronger regularization marginally hurts; the default C=1.0 is already well-calibrated for this 15-feature LR.
+**Decision:** Rejected. train.py reverted to Run 077 state (C=1.0 default).
+
+---
+
+### Run 079 — 2026-05-30
+**Change:** Pure LR (Run 077 feature set, 15 features — lr_features_002), set C=0.5 (moderate regularization vs default C=1.0).
+**Val log loss:** 0.616812
+**Current best:** 0.616811 (Run 077)
+**Threshold required:** 0.615269 (current_best × 0.9975)
+**Result:** Regression — 0.616812 > 0.616811 (+0.000002%). Functionally identical to default; C=0.5 provides no benefit. C values in both directions (0.1 and 0.5) are worse or equal to the default C=1.0.
+**Decision:** Rejected. train.py reverted to Run 077 state (C=1.0 default).
+
+---
+
+### Run 080 — 2026-05-30
+**Change:** Pure LR, remove all away rolling features from lr_features_002 (away_pts_scored_4/8/16, away_win_pct_4/8/16). 15 → 9 features: baseline + home_pts_scored_4/8/16 + home_win_pct_4/8/16.
+**Val log loss:** 0.616564
+**Current best:** 0.616811 (Run 077)
+**Threshold required:** 0.615269 (current_best × 0.9975)
+**Improvement:** 0.040% (0.616811 → 0.616564) — below the 0.25% minimum threshold.
+**Decision:** Rejected. train.py reverted to Run 077 state (lr_features_002 restored to 15 features). best_meta.json restored to run_82 (0.616811).
+
+---
+
+### Run 081 — 2026-05-30
+**Change:** Pure LR, replaced home/away rolling pairs with differentials: win_pct_diff_4/8/16 = home_win_pct - away_win_pct, pts_scored_diff_4/8/16 = home_pts_scored - away_pts_scored. 15 → 9 features (baseline + 6 differentials). add_differential_features() added to compute these columns after load_data().
+**Val log loss:** 0.618701
+**Current best:** 0.616811 (Run 077)
+**Threshold required:** 0.615269 (current_best × 0.9975)
+**Result:** Regression — 0.618701 > 0.616811 (+0.28%). Collapsing home/away pairs into differences loses information; LR benefits from seeing both sides separately rather than just the margin.
+**Decision:** Rejected. train.py reverted to Run 077 state (lr_features_002 restored, add_differential_features removed).
+
+---
+
+### Run 082 — 2026-05-30
+**Change:** Pure LR, expanded lr_features_002 to include home_rest_days and away_rest_days (15 → 17 features). Note: lr_features_002 never contained pts_allowed, so this run tests adding rest_days to LR rather than removing pts_allowed as originally described in the queue.
+**Val log loss:** 0.616490
+**Current best:** 0.616811 (Run 077)
+**Threshold required:** 0.615269 (current_best × 0.9975)
+**Improvement:** 0.052% (0.616811 → 0.616490) — below the 0.25% minimum threshold.
+**Decision:** Rejected. train.py reverted to Run 077 state (lr_features_002 restored to 15 features). best_meta.json restored to run_82 (0.616811).
+
+---
+
+### Run 083 — 2026-05-30
+**Change:** Pure LR (15 features), set C=2.0 (weaker L2 regularization than default C=1.0).
+**Val log loss:** 0.616810
+**Current best:** 0.616811 (Run 077)
+**Threshold required:** 0.615269 (current_best × 0.9975)
+**Improvement:** 0.0002% (0.616811 → 0.616810) — functionally identical, far below the 0.25% threshold. C values tested: 0.1 (worse), 0.5 (worse), 1.0 (best/baseline), 2.0 (functionally identical). Default C=1.0 is at the optimum.
+**Decision:** Rejected. train.py reverted to Run 077 state (C=1.0 default). best_meta.json restored to run_82 (0.616811).
+
+---
+
+### Run 084 — 2026-05-30
+**Change:** Pure LR (15 features), set C=5.0 (much weaker L2 regularization).
+**Val log loss:** 0.616810
+**Current best:** 0.616811 (Run 077)
+**Threshold required:** 0.615269 (current_best × 0.9975)
+**Improvement:** 0.0002% — identical result to C=2.0 (Run 083). C values above 1.0 all converge to the same solution; the L2 penalty becomes negligible at high C for this feature set and dataset size.
+**Decision:** Rejected. train.py reverted to Run 077 state (C=1.0 default). best_meta.json restored to run_82 (0.616811).
+
+---
+
+### Run 085 — 2026-05-30
+**Change:** Pure LR (15 features), penalty='l1', solver='liblinear', C=1.0. build_model updated to accept penalty/solver/l1_ratio from config.
+**Val log loss:** 0.616755
+**Current best:** 0.616811 (Run 077)
+**Threshold required:** 0.615269 (current_best × 0.9975)
+**Improvement:** 0.009% (0.616811 → 0.616755) — below the 0.25% minimum threshold. L1 penalty slightly better than L2 but not enough; L1 implicit feature selection adds marginal benefit.
+**Decision:** Rejected. train.py reverted to Run 077 state (build_model and lr_config both reverted). best_meta.json restored to run_82 (0.616811).
+
+---
+
+### Run 086 — 2026-05-30
+**Change:** Pure LR (15 features), penalty='elasticnet', solver='saga', l1_ratio=0.5, C=1.0. build_model updated to accept penalty/solver/l1_ratio from config.
+**Val log loss:** 0.616775
+**Current best:** 0.616811 (Run 077)
+**Threshold required:** 0.615269 (current_best × 0.9975)
+**Improvement:** 0.006% (0.616811 → 0.616775) — below the 0.25% minimum threshold. ElasticNet slightly worse than pure L1 (Run 085: 0.616755); the L2 component of the blend dilutes the L1 benefit.
+**Decision:** Rejected. train.py reverted to Run 077 state (build_model and lr_config both reverted). best_meta.json restored to run_82 (0.616811).
+
+---
+
+### Run 087 — 2026-05-30
+**Change:** Pure LR (15 features), penalty=None, solver='lbfgs' (no regularization). build_model updated to accept penalty/solver from config.
+**Val log loss:** 0.616810
+**Current best:** 0.616811 (Run 077)
+**Threshold required:** 0.615269 (current_best × 0.9975)
+**Improvement:** 0.0002% (0.616811 → 0.616810) — functionally identical to C=2.0 and C=5.0. Removing regularization entirely converges to the same solution as high-C L2 — confirms that at this dataset size and feature count, the L2 penalty is already negligible at C=1.0.
+**Decision:** Rejected. train.py reverted to Run 077 state (build_model and lr_config both reverted). best_meta.json restored to run_82 (0.616811).
+
+---
+
+### Run 088 — 2026-05-30
+**Change:** Added home/away_margin_4/8/16 (rolling avg point differential) to lr_features_002 (15 → 21 features). compute_rolling_features extended to track margin history per team. lr_features_002 expanded with 6 new columns.
+**Val log loss:** 0.625782
+**Current best:** 0.616811 (Run 077)
+**Threshold required:** 0.615269 (current_best × 0.9975)
+**Result:** Significant regression — 0.625782 > 0.616811 (+1.45%). Margin = pts_scored − pts_allowed is a linear combination of features already in the model; adding it introduces collinearity that inflates variance. All three compute_rolling_features changes and lr_features_002 reverted.
+**Decision:** Rejected. train.py fully reverted to Run 077 state.
+
+---
+
+### Run 089 — 2026-05-30
+**Change:** Replaced pts_scored rolling features in lr_features_002 with point differential (home/away_margin_4/8/16). 15 features maintained but signal type changed. compute_rolling_features extended to track margin.
+**Val log loss:** 0.627550
+**Current best:** 0.616811 (Run 077)
+**Threshold required:** 0.615269 (current_best × 0.9975)
+**Result:** Regression — 0.627550 > 0.616811 (+1.74%). Point margin alone is less informative than pts_scored; the separate offensive/defensive signals in pts_scored carry information that margin compresses away. train.py fully reverted to Run 077 state.
+
+---
+
+### Run 090 — 2026-05-30
+**Change:** Added home_win_streak and away_win_streak (signed consecutive W/L count) to lr_features_002 (15 → 17 features). compute_rolling_features extended to track a streak counter per team in team_history.
+**Val log loss:** 0.617948
+**Current best:** 0.616811 (Run 077)
+**Threshold required:** 0.615269 (current_best × 0.9975)
+**Result:** Regression — 0.617948 > 0.616811 (+0.18%). Win streak adds noise on top of existing win% features — the rolling win percentages already capture momentum; the raw streak count is collinear and introduces variance without new information.
+**Decision:** Rejected. train.py fully reverted to Run 077 state (streak tracking removed from compute_rolling_features, lr_features_002 restored to 15 features).

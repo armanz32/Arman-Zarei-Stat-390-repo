@@ -73,3 +73,14 @@ What I found:
 - A purely Logistic Regression model has produced the best score
 
 Goal for Next Week: Finalize project and begin presentation slides
+
+Week 7
+
+Goal: Finalize Model and make report
+What I tried:
+- A few extra regularization attemtps
+- A few extra features
+- The report and slideshow
+
+What I found:
+- Nothing else significantly improved the model.

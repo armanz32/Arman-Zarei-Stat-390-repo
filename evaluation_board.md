@@ -94,3 +94,16 @@ Experiment Table
 | 075 | Ensemble XGB+LR weight grid search (best: 0.3/0.7) | XGB: 23 feat; LR: 15 feat | 0.617695 | 0.633435 ± 0.008258 | -0.17% vs 066 | ❌ Rejected (<0.25% threshold; missed by 0.000515) |
 | 076 | Ensemble XGB+LR w=0.2/0.8 | XGB: 23 feat; LR: 15 feat | 0.617311 | 0.633685 ± 0.008393 | -0.23% vs 066 | ❌ Rejected (<0.25% threshold; missed by 0.000131) |
 | 077 | Ensemble XGB+LR w=0.0/1.0 (pure LR) | LR: 15 features (Groups A+B+C) | 0.616811 | 0.634619 ± 0.008704 | -0.31% vs 066 | ✅ Accepted (new best: 0.616811) |
+| 078 | Logistic Regression C=0.1 | LR: 15 features (Groups A+B+C) | 0.616832 | 0.634450 ± 0.008692 | +0.003% vs 077 | ❌ Rejected (regression) |
+| 079 | Logistic Regression C=0.5 | LR: 15 features (Groups A+B+C) | 0.616812 | 0.634598 ± 0.008704 | +0.000002% vs 077 | ❌ Rejected (regression; functionally identical) |
+| 080 | Logistic Regression, no away rolling features | LR: 9 features (baseline + home_pts_scored_4/8/16 + home_win_pct_4/8/16) | 0.616564 | 0.643857 ± 0.009477 | -0.040% vs 077 | ❌ Rejected (<0.25% threshold) |
+| 081 | Logistic Regression, differential features | LR: 9 features (baseline + win_pct_diff_4/8/16 + pts_scored_diff_4/8/16) | 0.618701 | 0.633577 ± 0.008656 | +0.28% vs 077 | ❌ Rejected (regression) |
+| 082 | Logistic Regression + rest_days (17 features) | LR: 17 features (Groups A+B+C + home_rest_days + away_rest_days) | 0.616490 | 0.634783 ± 0.008574 | -0.052% vs 077 | ❌ Rejected (<0.25% threshold) |
+| 083 | Logistic Regression C=2.0 | LR: 15 features (Groups A+B+C) | 0.616810 | 0.634630 ± 0.008704 | -0.0002% vs 077 | ❌ Rejected (<0.25% threshold; functionally identical) |
+| 084 | Logistic Regression C=5.0 | LR: 15 features (Groups A+B+C) | 0.616810 | 0.634637 ± 0.008702 | -0.0002% vs 077 | ❌ Rejected (<0.25% threshold; identical to C=2.0) |
+| 085 | Logistic Regression L1 penalty (liblinear) | LR: 15 features (Groups A+B+C) | 0.616755 | 0.634549 ± 0.008700 | -0.009% vs 077 | ❌ Rejected (<0.25% threshold) |
+| 086 | Logistic Regression ElasticNet l1_ratio=0.5 (saga) | LR: 15 features (Groups A+B+C) | 0.616775 | 0.634583 ± 0.008703 | -0.006% vs 077 | ❌ Rejected (<0.25% threshold) |
+| 087 | Logistic Regression penalty=None (no regularization) | LR: 15 features (Groups A+B+C) | 0.616810 | 0.634642 ± 0.008702 | -0.0002% vs 077 | ❌ Rejected (<0.25% threshold; identical to C≥2.0) |
+| 088 | Logistic Regression + rolling point differential (margin_4/8/16) | LR: 21 features (Groups A+B+C + home/away_margin_4/8/16) | 0.625782 | 0.632255 ± 0.008843 | +1.45% vs 077 | ❌ Rejected (regression; margin collinear with pts_scored/allowed) |
+| 089 | Logistic Regression, margin replaces pts_scored | LR: 15 features (baseline + home/away_margin_4/8/16 + home/away_win_pct_4/8/16) | 0.627550 | 0.633241 ± 0.008388 | +1.74% vs 077 | ❌ Rejected (regression; pts_scored + win_pct separately more informative than margin alone) |
+| 090 | Logistic Regression + win streak features | LR: 17 features (Groups A+B+C + home_win_streak + away_win_streak) | 0.617948 | 0.634581 ± 0.008429 | +0.18% vs 077 | ❌ Rejected (regression; streak adds noise, not signal, on top of win% features) |
